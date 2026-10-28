@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111410"><meta name="description" content="Tu temporizador HIIT en español: Tabata, rondas, cronómetro y rutinas con guía por voz."><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pulso HIIT"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><title>Pulso · Tu timer HIIT</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<svg class="sprite" aria-hidden="true"><defs>
+<symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="14" r="8"/><path d="M12 6V3m-3 0h6m3 4 2-2M12 10v5l3 2"/></symbol>
+<symbol id="i-rounds" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 1-4-6M20 3v6h-6M12 8v5l3 2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="2"/><rect x="14" y="4" width="6" height="6" rx="2"/><rect x="4" y="14" width="6" height="6" rx="2"/><rect x="14" y="14" width="6" height="6" rx="2"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="4"/></symbol>
+<symbol id="i-skip" viewBox="0 0 24 24"><path d="m5 5 10 7L5 19Z"/><path d="M19 5v14"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h12l4 4v14H3V3Zm2 0v6h10V3M7 21v-8h10v8"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+</defs></svg>
+<main class="shell">
+<aside class="companion">
+<div class="brand"><span class="brand-mark"><span></span><span></span><span></span></span>PULSO<span class="brand-hiit">HIIT TIMER</span></div>
+<div class="intro"><span class="eyebrow">A TU RITMO. A TU MANERA.</span><h1>Concéntrate<br>en el siguiente<br><em>intervalo.</em></h1><p>Tú pones el esfuerzo.<br>Pulso lleva la cuenta.</p></div>
+<div class="mini-timeline" aria-hidden="true"><span class="mini-work"></span><span class="mini-rest"></span><span class="mini-work"></span><span class="mini-rest"></span><span class="mini-work"></span><span class="mini-rest"></span><span class="mini-work"></span><span class="mini-rest"></span></div>
+<div class="legend"><span><i class="dot work"></i>Entrena</span><span><i class="dot rest"></i>Recupera</span></div>
+<div class="side-bottom"><div class="offline"><i></i>Sin cuenta. Sin distracciones.</div><p>Mantén la app visible para escuchar las alertas.</p></div>
+</aside>
+<section class="app" aria-label="Temporizador Pulso">
+<header class="app-header"><a class="mobile-brand" href="#" aria-label="Pulso, inicio">PULSO<span>●</span></a><span id="headerTitle">Tu entrenamiento</span><button id="settingsButton" class="icon-button" aria-label="Ajustes de audio y preferencias"><svg><use href="#i-volume"/></svg></button></header>
+<div class="mobile-preview-note">Mantén la app visible para escuchar las alertas.</div>
+<div class="content" id="configScreen">
+<div class="section-kicker"><span id="modeEyebrow">INTERVALOS · TABATA</span><span class="small-badge">PERSONALIZABLE</span></div>
+<div class="name-line"><input id="routineName" aria-label="Nombre de la rutina" maxlength="60" value="Mi Tabata"><span aria-hidden="true">↗</span></div>
+<div class="session-summary"><div><span class="summary-label">DURACIÓN TOTAL</span><strong id="totalTime">34:45</strong></div><div class="summary-detail"><span id="summaryRounds">8 rondas × 4 ciclos</span><span id="summaryPattern">40 s de trabajo / 20 s de descanso</span></div></div>
+<div id="intervalRows" class="intervals"></div>
+<div class="config-actions"><button id="startButton" class="primary"><svg><use href="#i-play"/></svg>Empezar entrenamiento</button><button id="saveButton" class="save-button"><svg><use href="#i-save"/></svg>Guardar rutina</button></div>
+<div class="section-title"><h2>Tus rutinas</h2><span id="routineCount">0 guardadas</span></div><div id="profiles" class="profiles"></div>
+</div>
+<div class="content more-screen" id="moreScreen" hidden>
+<div class="section-kicker">HECHO PARA TU ENTRENAMIENTO</div><h1 class="page-title">A tu manera.</h1><p class="muted">Elige cómo quieres recibir cada cambio de intervalo.</p>
+<div class="settings-list" id="preferences"></div>
+<div class="audio-check"><button type="button" id="testVoiceButton" class="secondary"><svg aria-hidden="true"><use href="#i-volume"/></svg>Probar voz</button><p class="muted">Sube el volumen y toca el botón para comprobar que escuchas la guía en español.</p></div>
+<div class="install-card"><div><strong>Siempre a mano.</strong><p class="muted">Añade Pulso a tu pantalla de inicio.</p></div><button type="button" id="installHelpButton" class="secondary">Instalar en iPhone</button><p id="offlineStatus" class="muted" role="status">La primera visita necesita conexión.</p></div>
+<div class="section-title"><h2>Tu historial</h2><span id="historyCount">0 sesiones</span></div><div id="history" class="history"></div>
+<div class="data-actions"><button id="exportButton" class="text-button">Exportar mis datos</button><label class="text-button import-label">Importar copia<input id="importFile" type="file" accept="application/json,.json" hidden></label></div>
+</div>
+<div class="content timer-screen" id="timerScreen" hidden>
+<div class="timer-top"><span id="activeRoutine">Mi Tabata</span><button id="closeTimer" class="icon-button" aria-label="Terminar entrenamiento"><svg><use href="#i-close"/></svg></button></div>
+<div class="phase-heading"><span id="phaseLabel">PREPÁRATE</span><p id="phaseSubtitle">Un momento para ti.</p></div>
+<div class="ring-wrap"><svg class="progress-ring" viewBox="0 0 320 320" aria-hidden="true"><circle class="ring-track" cx="160" cy="160" r="145"/><circle id="progressCircle" class="ring-progress" cx="160" cy="160" r="145"/></svg><div class="ring-text"><strong id="timerDigits" role="timer" aria-label="Tiempo restante">00:05</strong><span id="timerCaption">SEGUNDOS RESTANTES</span></div></div>
+<div class="timer-stats"><div><strong id="roundNumber">1 <span>/ 8</span></strong><span>RONDA</span></div><div><strong id="cycleNumber">1 <span>/ 4</span></strong><span>CICLO</span></div><div><strong id="remainingTotal">34:45</strong><span>POR TERMINAR</span></div></div>
+<div class="next-phase"><span>DESPUÉS</span><strong id="nextPhase">Entrena · 00:40</strong></div>
+<div class="timer-controls"><button id="pauseButton" class="primary"><svg><use href="#i-pause"/></svg>Pausar</button><button id="skipButton" class="secondary" aria-label="Saltar intervalo"><svg><use href="#i-skip"/></svg><span>Saltar</span></button></div>
+<button id="endButton" class="text-button end-button">Terminar sesión</button><div id="laps" class="laps"></div>
+</div>
+<div class="content completion-screen" id="completionScreen" hidden><div class="completed-mark"><svg><use href="#i-check"/></svg></div><span class="eyebrow">UNA SESIÓN MÁS PARA TI</span><h1 id="completionTitle">¡Lo hiciste!</h1><p id="completionMessage">Entrenamiento completado.</p><div class="completion-total"><span>TIEMPO ENTRENADO</span><strong id="completionTime">00:00</strong></div><button id="againButton" class="primary"><svg><use href="#i-play"/></svg>Volver a entrenar</button><button id="backButton" class="secondary">Volver al inicio</button></div>
+<nav class="bottom-nav" id="bottomNav" aria-label="Tipo de temporizador"><button data-mode="tabata" class="selected"><svg><use href="#i-timer"/></svg><span>Tabata</span></button><button data-mode="rounds"><svg><use href="#i-rounds"/></svg><span>Rondas</span></button><button data-mode="stopwatch"><svg><use href="#i-clock"/></svg><span>Cronómetro</span></button><button data-mode="more"><svg><use href="#i-grid"/></svg><span>Más</span></button></nav>
+</section>
+</main>
+<dialog id="editDialog"><form method="dialog" id="editForm"><div class="dialog-head"><h2 id="editTitle">Entrenar</h2><button value="cancel" type="button" id="cancelEdit" class="icon-button" aria-label="Cerrar"><svg><use href="#i-close"/></svg></button></div><p id="editHint" class="muted"></p><div id="durationFields" class="duration-fields"><label><input id="minutesInput" type="number" min="0" max="60" inputmode="numeric" required><span>MINUTOS</span></label><b>:</b><label><input id="secondsInput" type="number" min="0" max="59" inputmode="numeric" required><span>SEGUNDOS</span></label></div><div id="countFields" class="count-fields" hidden><button type="button" id="minusCount" class="secondary" aria-label="Reducir">−</button><input id="countInput" type="number" min="1" max="100" inputmode="numeric" aria-label="Cantidad"><button type="button" id="plusCount" class="secondary" aria-label="Aumentar">+</button></div><p id="editError" class="error" role="alert"></p><button class="primary" type="submit">Listo</button></form></dialog>
+<dialog id="confirmDialog"><form method="dialog"><h2 id="confirmTitle">¿Terminar sesión?</h2><p id="confirmText" class="muted"></p><div class="confirm-actions"><button value="cancel" class="secondary">Cancelar</button><button value="ok" class="primary" id="confirmOK">Terminar</button></div></form></dialog>
+<dialog id="installHelpDialog" aria-labelledby="installHelpTitle"><form method="dialog"><div class="dialog-head"><h2 id="installHelpTitle">Pulso en tu iPhone</h2><button type="submit" class="icon-button" aria-label="Cerrar instrucciones"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div><ol class="install-steps"><li>Abre la dirección de Pulso en <strong>Safari</strong>.</li><li>Toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</li><li>Si aparece, activa <strong>Abrir como app web</strong> y toca <strong>Añadir</strong>.</li></ol><p class="muted">Después de abrirla con conexión una vez, la app puede cargar sin internet. La voz depende de las voces disponibles en tu iPhone.</p><p class="install-note">Para recibir las alertas, mantén Pulso visible y comprueba el volumen. Al bloquear el iPhone o cambiar de app, iOS puede suspender los sonidos y la voz.</p><button type="submit" class="primary">Entendido</button></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><div id="screenFlash" aria-hidden="true"></div>
+<script src="engine.js"></script><script src="app.js"></script><script src="pwa.js"></script>
+</body></html>
+
