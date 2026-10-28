@@ -1,7 +1,7 @@
 /* Pulso HIIT web: sin dependencias ni cuentas. iOS puede suspender el audio web. */
 (function () {
 'use strict';
-const E = PulsoEngine, $ = id => document.getElementById(id);
+const E = PulsoEngine, Voices = PulsoVoices, $ = id => document.getElementById(id);
 const fields = {
  prepare: ['Prepárate','Cuenta atrás antes de empezar','prepare'],
  work: ['Entrenar','Da lo mejor de ti durante este tiempo','work'],
@@ -17,7 +17,7 @@ const defaults = {
  rounds:{id:null,name:'Mis rondas',mode:'rounds',prepare:5,work:60,rest:0,rounds:3,cycles:1,cycleRest:0,cooldown:0,lap:20},
  stopwatch:{id:null,name:'Mi cronómetro',mode:'stopwatch',prepare:0,work:20,rest:0,rounds:1,cycles:1,cycleRest:0,cooldown:0,lap:20}
 };
-const defaultPrefs = {sound:true,voice:true,flash:false,keepAwake:true};
+const defaultPrefs = {sound:true,voice:true,flash:false,keepAwake:true,voiceGender:'auto',voiceURI:''};
 let drafts = structuredClone(defaults), profiles = [], history = [], prefs = {...defaultPrefs}, currentMode='tabata', session=null, lastWorkout=null, editKey=null, frame=null, audio=null, wakeLock=null, toastTimer=null;
 function uid(){return globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);}
 function node(tag,className,text){const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;}
@@ -31,13 +31,15 @@ try{
  if(raw){const s=JSON.parse(raw);if(s.version===1){for(const mode of Object.keys(defaults)){try{drafts[mode]=cleanWorkout(s.drafts[mode]);}catch{}}
  if(Array.isArray(s.profiles))profiles=s.profiles.flatMap(p=>{try{return [cleanWorkout(p)];}catch{return [];}});
  if(Array.isArray(s.history))history=s.history.filter(h=>h && typeof h.id==='string' && typeof h.name==='string' && h.name.length<=60 && Number.isFinite(h.duration) && h.duration>=0 && typeof h.date==='string' && !Number.isNaN(Date.parse(h.date))).map(h=>({...h,name:h.name.slice(0,60)}));
- for(const k of Object.keys(defaultPrefs))if(typeof s.prefs?.[k]==='boolean')prefs[k]=s.prefs[k];
+ for(const k of Object.keys(defaultPrefs))if(typeof s.prefs?.[k]===typeof defaultPrefs[k])prefs[k]=s.prefs[k];
+ if(!['auto','female','male'].includes(prefs.voiceGender))prefs.voiceGender='auto';
+ if(prefs.voiceURI.length>1000)prefs.voiceURI='';
  }} else {
  profiles=[{...defaults.tabata,id:uid(),name:'Tabata esencial',cycles:1,cycleRest:0,cooldown:0},{...defaults.rounds,id:uid(),name:'Tres rondas · box'}];
  persist();
  }
 }catch{toast('El almacenamiento local no está disponible. Puedes usar el timer y exportar tus datos.');}
-function showScreen(name){for(const key of ['config','more','timer','completion'])$(key+'Screen').hidden=key!==name;document.querySelector('.app').classList.toggle('training',['timer','completion'].includes(name));}
+function showScreen(name){for(const key of ['config','more','timer','completion'])$(key+'Screen').hidden=key!==name;document.querySelector('.app').classList.toggle('training',['timer','completion'].includes(name));document.body.classList.toggle('is-training',['timer','completion'].includes(name));}
 function renderConfig(){
  const w=drafts[currentMode];
  $('headerTitle').textContent='Tu entrenamiento';$('routineName').value=w.name;
@@ -96,10 +98,33 @@ function renderMore(){
  $('preferences').replaceChildren();
  const definitions={sound:['Señales de sonido','Cambios de fase y cuenta atrás de 3 segundos.'],voice:['Guía por voz','Escucha la fase y la ronda en español.'],flash:['Destello de pantalla','Un destello suave al cambiar de intervalo.'],keepAwake:['Mantener pantalla activa','Mientras entrenas, si el navegador lo permite.']};
  for(const [key,[title,detail]]of Object.entries(definitions)){const label=node('label','preference'),copy=node('span');copy.append(node('strong','',title),node('small','',detail));const input=node('input','toggle');input.type='checkbox';input.checked=prefs[key];input.addEventListener('change',()=>{prefs[key]=input.checked;persist();});label.append(copy,input);$('preferences').append(label);}
+ renderVoiceControls();
  $('historyCount').textContent=history.length+' sesiones';$('history').replaceChildren();
  if(!history.length){const empty=node('div','empty-card');empty.append(icon('clock'),node('p','','Tu próxima sesión empieza aquí. Al terminar, la encontrarás en tu historial.'));$('history').append(empty);}
  for(const h of [...history].reverse()){const item=node('div','history-item'),mark=node('div','history-mark');mark.append(icon(h.completed?'check':'clock'));const copy=node('div');copy.append(node('strong','',h.name),node('small','',new Date(h.date).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+(h.completed?'Completada':'Finalizada antes de tiempo')+(h.skipped?' · '+h.skipped+' saltos':'')));const time=node('time','',E.format(h.duration));time.dateTime='PT'+Math.round(h.duration)+'S';item.append(mark,copy,time);$('history').append(item);}
 }
+function availableVoices(){return 'speechSynthesis'in window?speechSynthesis.getVoices():[];}
+function selectedVoice(){return Voices.choose(availableVoices(),{gender:prefs.voiceGender,voiceURI:prefs.voiceURI});}
+function renderVoiceControls(){
+ const holder=$('voiceChoices');holder.replaceChildren();
+ const fieldset=node('fieldset','voice-select');fieldset.append(node('legend','','Voz de la guía'));
+ const typeLabel=node('label','voice-field','Tipo de voz'),type=node('select');type.id='voiceGenderSelect';type.setAttribute('aria-label','Tipo de voz');
+ for(const [value,title]of [['auto','Automática'],['female','Femenina'],['male','Masculina']]){const o=node('option','',title);o.value=value;type.append(o);}
+ type.value=prefs.voiceGender;type.addEventListener('change',()=>{prefs.voiceGender=type.value;prefs.voiceURI='';persist();renderVoiceControls();});typeLabel.append(type);fieldset.append(typeLabel);
+ const voiceLabel=node('label','voice-field','Elegir una voz por nombre'),select=node('select');select.id='deviceVoiceSelect';select.setAttribute('aria-label','Voz disponible en el dispositivo');
+ const automatic=node('option','','Según el tipo elegido');automatic.value='';select.append(automatic);
+ for(const voice of Voices.listSpanish(availableVoices())){const g=Voices.gender(voice),suffix=g==='male'?' · masculina':g==='female'?' · femenina':'';const o=node('option','',voice.name+' · '+voice.lang+suffix);o.value=Voices.key(voice);select.append(o);}
+ if(prefs.voiceURI&&!Voices.listSpanish(availableVoices()).some(v=>Voices.key(v)===prefs.voiceURI)){const unavailable=node('option','','Voz guardada no disponible aquí');unavailable.value=prefs.voiceURI;unavailable.disabled=true;select.append(unavailable);}
+ select.value=prefs.voiceURI;
+ select.addEventListener('change',()=>{prefs.voiceURI=select.value;if(prefs.voiceURI)prefs.voiceGender='auto';persist();renderVoiceControls();});voiceLabel.append(select);fieldset.append(voiceLabel);
+ const status=node('p','muted');status.id='voiceChoiceStatus';status.setAttribute('role','status');const result=selectedVoice();
+ if(result.reason==='no-spanish-voices')status.textContent='El navegador aún no muestra voces en español. Pulsa Probar voz; si no suena, comprueba las voces disponibles en los ajustes del iPhone.';
+ else if(result.reason==='gender-unavailable')status.textContent='No se detectó una voz '+(prefs.voiceGender==='male'?'masculina':'femenina')+' en español. Se usará '+result.voice.name+'. Puedes elegir otra por nombre y escucharla con Probar voz.';
+ else if(result.reason==='missing-selected-voice')status.textContent='La voz guardada no está disponible en este dispositivo. Se usará '+(result.voice?.name||'la voz del sistema')+'.';
+ else status.textContent='Voz seleccionada: '+result.voice.name+' · '+result.voice.lang+'. Escúchala con Probar voz.';
+ fieldset.append(status);holder.append(fieldset);
+}
+if('speechSynthesis'in window&&speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',()=>{if(!$('moreScreen').hidden)renderVoiceControls();});
 function initAudio(){try{const A=window.AudioContext||window.webkitAudioContext;if(A&&!audio)audio=new A();if(audio?.state==='suspended')audio.resume().catch(()=>{});}catch{}}
 function beep(freq=880,length=.18){if(!prefs.sound||document.hidden||!audio)return;try{const t=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();o.frequency.value=freq;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+length);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+length+.02);}catch{}}
 let lastVoiceError = -Infinity;
@@ -108,8 +133,9 @@ function speak(text,force=false){
  if(!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window)){if(force)toast('Este navegador no ofrece guía por voz. Abre Pulso en Safari.');return false;}
  speechSynthesis.cancel();
  const utterance=new SpeechSynthesisUtterance(text);utterance.lang='es-MX';utterance.rate=1.02;
- const voices=speechSynthesis.getVoices(),voice=voices.find(v=>v.lang.toLowerCase()==='es-mx')||voices.find(v=>v.lang.toLowerCase().startsWith('es'));
- if(voice)utterance.voice=voice;
+ const result=selectedVoice(),voice=result.voice;
+ if(voice){utterance.voice=voice;utterance.lang=voice.lang;}
+ if(force&&result.reason==='gender-unavailable')toast('Este dispositivo no ofrece una voz '+(prefs.voiceGender==='male'?'masculina':'femenina')+' identificada en español. Escucharás '+voice.name+'.');
  utterance.onerror=event=>{
   if(['interrupted','canceled'].includes(event.error))return;
   if(force||Date.now()-lastVoiceError>60000){lastVoiceError=Date.now();toast('No se pudo reproducir la voz. Comprueba el volumen y prueba desde Safari con una voz en español disponible.');}
@@ -147,6 +173,7 @@ function tick(){
  $('phaseLabel').textContent=clock.running?phase.title:'En pausa';
  $('phaseSubtitle').textContent=!clock.running?'Toma aire. Continúa cuando estés listo.':phase.kind==='prepare'?'Un momento para ti.':phase.kind==='work'?(isStopwatch?'Tu ritmo, tu tiempo.':'Este intervalo es tuyo.'):'Recupera. Lo estás haciendo bien.';
  $('timerDigits').textContent=E.format(isStopwatch&&phase.kind!=='prepare'?Math.floor(remaining):remaining);
+ $('timerDigits').classList.toggle('long-time',$('timerDigits').textContent.length>5);
  $('timerDigits').setAttribute('aria-label',(isStopwatch&&phase.kind!=='prepare'?'Tiempo transcurrido: ':'Tiempo restante: ')+$('timerDigits').textContent);
  $('timerCaption').textContent=isStopwatch&&phase.kind!=='prepare'?'TIEMPO TRANSCURRIDO':'TIEMPO RESTANTE';
  $('progressCircle').style.strokeDashoffset=String(911.062*(1-Math.max(0,Math.min(1,fraction))));

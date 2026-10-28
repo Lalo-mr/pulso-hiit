@@ -4,12 +4,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const Engine = require('./engine.js');
+const Voices = require('./voices.js');
 
 // Exercise real app event handlers with a deterministic clock and minimal DOM.
 // This checks integration behavior; it does not replace a Safari/device test.
 function harness(options = {}) {
   let now = 0, sequence = 0;
-  const frames = new Map(), elements = new Map(), spoken = [];
+  const frames = new Map(), elements = new Map(), spoken = [], speechListeners = new Map();
+  let deviceVoices = options.voices || [{name:'Paulina',lang:'es-MX',voiceURI:'paulina-mx'}];
   class Element {
     constructor(tag = 'div') {
       this.tagName = tag.toUpperCase(); this.children = []; this.listeners = new Map();
@@ -18,6 +20,8 @@ function harness(options = {}) {
       const classes = new Set();
       this.classList = {add: x => classes.add(x), remove: x => classes.delete(x), toggle(x, force) { const enabled = force === undefined ? !classes.has(x) : force; if(enabled) classes.add(x); else classes.delete(x); return enabled; }};
     }
+    set id(value) { this.elementId = String(value); elements.set(this.elementId,this); }
+    get id() { return this.elementId || ''; }
     set textContent(value) { this.children = []; this.text = String(value); }
     get textContent() { return this.text || this.children.map(c => typeof c === 'string' ? c : c.textContent).join(''); }
     append(...items) { this.children.push(...items); }
@@ -41,7 +45,7 @@ function harness(options = {}) {
   const query = new Map([['.app',new Element()],['.summary-label',new Element()],['.mobile-brand',new Element('a')]]);
   const document = new Element();
   Object.assign(document, {
-    hidden: false, activeElement: new Element(),
+    hidden: false, body: new Element('body'), activeElement: new Element(),
     getElementById: get,
     createElement: tag => new Element(tag),
     createElementNS: (namespace,tag) => { const e = new Element(tag); e.namespaceURI = namespace; return e; },
@@ -55,7 +59,7 @@ function harness(options = {}) {
   const localStorage = {getItem(){return saved;},setItem(key,value){if(options.storageFails) throw new Error('storage unavailable'); saved = value;}};
   class FakeDate extends Date { constructor(...args) { super(...(args.length ? args : [now])); } static now(){return now;} }
   const context = {
-    console, document, PulsoEngine:Engine, localStorage, structuredClone,
+    console, document, PulsoEngine:Engine, PulsoVoices:Voices, localStorage, structuredClone,
     Date:FakeDate, crypto:{randomUUID:()=>`test-${++sequence}`},
     navigator:{}, matchMedia:()=>({matches:false}),
     requestAnimationFrame:callback => { const id = ++sequence; frames.set(id,callback); return id; },
@@ -64,13 +68,15 @@ function harness(options = {}) {
   };
   if(!options.noVoice) {
     context.SpeechSynthesisUtterance = class { constructor(text){this.text=text;} };
-    context.speechSynthesis = {paused:false,cancel(){},resume(){},getVoices:()=>[{lang:'es-MX'}],speak:utterance=>spoken.push(utterance)};
+    context.speechSynthesis = {paused:false,cancel(){},resume(){},getVoices:()=>deviceVoices,speak:utterance=>spoken.push(utterance),addEventListener(type,handler){const list=speechListeners.get(type)||[];list.push(handler);speechListeners.set(type,list);}};
   }
   context.window = context;
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'app.js'),'utf8'),context,{filename:'app.js'});
   return {
     get, nav, spoken,
     click: id => get(id).fire('click'),
+    change: (id,value) => {const element=get(id);element.value=value;return element.fire('change');},
+    changeVoices(voices) {deviceVoices=voices;for(const handler of speechListeners.get('voiceschanged')||[])handler();},
     advance(ms) { now += ms; const next = frames.entries().next().value; if(next){frames.delete(next[0]); next[1]();} },
     data:()=>JSON.parse(saved)
   };
@@ -141,4 +147,48 @@ test('stopwatch history excludes preparation and paused time', async () => {
   assert.equal(h.data().history.length,1);
   assert.equal(h.data().history[0].duration,3);
   assert.equal(h.data().history[0].completed,true);
+});
+
+
+test('voice gender selection persists and the test uses the real selected device voice', async () => {
+  const female = {name:'Paulina',lang:'es-MX',voiceURI:'paulina-mx'};
+  const male = {name:'Jorge',lang:'es-ES',voiceURI:'jorge-es'};
+  const h = harness({voices:[female,male]});
+  await h.nav.more.fire('click');
+  await h.change('voiceGenderSelect','male');
+  assert.equal(h.data().prefs.voiceGender,'male');
+  assert.equal(h.data().prefs.voiceURI,'');
+  assert.match(h.get('voiceChoiceStatus').textContent,/Voz seleccionada: Jorge/);
+  await h.click('testVoiceButton');
+  assert.equal(h.spoken.at(-1).voice,male);
+  assert.equal(h.spoken.at(-1).lang,'es-ES');
+  assert.equal('pitch' in h.spoken.at(-1),false);
+});
+
+test('unavailable gender warns and uses an honest named fallback without faking pitch', async () => {
+  const female = {name:'Paulina',lang:'es-MX',voiceURI:'paulina-mx'};
+  const h = harness({voices:[female]});
+  await h.nav.more.fire('click');
+  await h.change('voiceGenderSelect','male');
+  assert.match(h.get('voiceChoiceStatus').textContent,/No se detectó una voz masculina/);
+  assert.match(h.get('voiceChoiceStatus').textContent,/Se usará Paulina/);
+  await h.click('testVoiceButton');
+  assert.match(h.get('toast').textContent,/no ofrece una voz masculina/);
+  assert.equal(h.spoken.at(-1).voice,female);
+  assert.equal('pitch' in h.spoken.at(-1),false);
+});
+
+test('delayed voiceschanged refreshes the visible list and preserves the preferred gender', async () => {
+  const h = harness({voices:[],prefs:{voiceGender:'male',voiceURI:''}});
+  await h.nav.more.fire('click');
+  assert.match(h.get('voiceChoiceStatus').textContent,/aún no muestra voces en español/);
+  assert.equal(h.get('deviceVoiceSelect').children.length,1);
+  const male = {name:'Jorge',lang:'es-ES',voiceURI:'jorge-es'};
+  const female = {name:'Paulina',lang:'es-MX',voiceURI:'paulina-mx'};
+  h.changeVoices([female,male]);
+  assert.equal(h.get('deviceVoiceSelect').children.length,3);
+  assert.match(h.get('voiceChoiceStatus').textContent,/Voz seleccionada: Jorge/);
+  assert.equal(h.get('voiceGenderSelect').value,'male');
+  await h.click('testVoiceButton');
+  assert.equal(h.spoken.at(-1).voice,male);
 });

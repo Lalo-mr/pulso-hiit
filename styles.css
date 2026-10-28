@@ -3,3 +3,248 @@
 
 /* Installation and audible setup stay close to the user's preferences. */
 .audio-check{padding:20px 0 12px;border-bottom:1px solid var(--line)}.audio-check .secondary{width:auto;min-width:160px}.audio-check .muted{font-size:10px;margin:10px 0}.install-card{margin-top:23px;padding:18px;border:1px solid #34432b;border-radius:14px;background:#1b2416}.install-card strong{font-size:14px}.install-card .muted{font-size:10px;margin:7px 0 14px}.install-card .secondary{font-size:12px}.install-card #offlineStatus{margin:12px 0 0}.install-steps{padding-left:22px;font-size:13px;line-height:1.7;margin:24px 0}.install-steps li{padding-left:4px;margin:12px 0}.install-note{padding:14px;border-radius:10px;background:#29351f;color:#c9d8bc;font-size:11px;line-height:1.7;margin:18px 0 22px}@media(display-mode:standalone){.app-header{padding-top:env(safe-area-inset-top);height:calc(69px + env(safe-area-inset-top))}.timer-screen{padding-top:calc(25px + env(safe-area-inset-top))}.completion-screen{padding-top:calc(45px + env(safe-area-inset-top))}}
+
+/* Responsive display: use the available viewport instead of a tall phone frame. */
+html{min-height:100%;overflow-x:hidden}
+body{min-height:100svh}
+.shell{height:min(920px,calc(100dvh - 80px));min-height:0}
+.app{height:100%;min-height:0;max-height:none}
+.content{min-height:0}
+.companion{min-height:0;overflow:hidden}
+.intro{margin-top:clamp(30px,8vh,102px)}
+.side-bottom{padding-top:clamp(24px,5vh,60px)}
+.ring-wrap{flex-shrink:0;aspect-ratio:1 / 1}
+.progress-ring{display:block;aspect-ratio:1 / 1;overflow:visible}
+.ring-text strong{white-space:nowrap;max-width:90%}
+.timer-top{gap:10px;min-height:44px}
+.timer-top>span{flex:1;min-width:0;max-width:none}
+.timer-top .icon-button{width:44px;height:44px;flex-shrink:0}
+#tvTimerButton{min-width:70px;min-height:44px;width:auto;padding:8px 12px;border-radius:10px;font-size:12px;flex-shrink:0}
+.timer-stats>div>span,.ring-text span,.next-phase>span{font-size:11px;letter-spacing:1px}
+.display-tools{--display-toolbar-height:52px;display:flex;flex-shrink:0;align-items:center;justify-content:flex-end;gap:6px;min-height:var(--display-toolbar-height);padding:4px 16px;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:3}
+.display-tools button{font-size:11px;line-height:1.2;min-height:44px;width:auto;border-radius:9px;background:#20291b;border:1px solid #35432b;padding:8px 11px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.display-tools button[aria-pressed=true]{background:#344a20;border-color:#6e963c;color:var(--lime)}
+.display-tools #projectionHelpButton{width:44px;flex-shrink:0;padding:8px}
+#displayStatus{position:fixed;z-index:15;pointer-events:none;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:min(620px,calc(100vw - 28px));margin:0;padding:11px 15px;border:1px solid #5b7144;border-radius:11px;background:#202d18f5;color:#dbeacb;font-size:12px;line-height:1.45;text-align:center;box-shadow:0 5px 30px #0006}
+.voice-settings{margin:22px 0 12px}
+.voice-select{min-width:0;border:1px solid #35432b;border-radius:13px;padding:18px;margin:0}
+.voice-select legend{padding:0 7px;color:#d9e6ce;font-size:13px;font-weight:650}
+.voice-field{display:flex;flex-direction:column;gap:8px;margin-bottom:15px;font-size:12px;color:#c7d6ba}
+.voice-field select{color:var(--text);background:#11190d;border:1px solid #4a5e38;border-radius:9px;padding:12px;width:100%;max-width:100%;min-width:0;min-height:44px;font:inherit;font-size:14px}
+.voice-field select:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.voice-select .muted{font-size:11px;margin:0;line-height:1.6}
+#projectionHelpDialog{max-height:calc(100dvh - 28px);overflow:auto}
+
+/* A workout never competes with the decorative desktop companion panel. */
+body.is-training{--training-height:calc(100dvh - 80px)}
+body.is-training .companion{display:none}
+body.is-training .shell{display:block;width:min(1360px,100%);max-width:1360px;height:var(--training-height)}
+body.is-training .app{min-height:0;max-height:none;height:100%}
+body.is-training .mobile-preview-note{display:none}
+body.is-training .completion-screen{min-height:0;height:100%;overflow:auto}
+body.is-training .display-tools{--display-toolbar-height:52px}
+
+/* Wide workout canvas, shared by desktops, landscape phones and televisions. */
+@media(min-width:761px){
+ body.is-training .timer-screen{
+  display:grid;grid-template-columns:minmax(0,46%) minmax(0,1fr);
+  grid-template-rows:44px minmax(40px,1fr) auto auto 54px 44px;
+  gap:12px 36px;padding:20px 32px;overflow:hidden;position:relative;
+ }
+ body.is-training .timer-top{grid-column:2;grid-row:1}
+ body.is-training .phase-heading{grid-column:2;grid-row:2;margin:0;align-self:center}
+ body.is-training .phase-heading>span{font-size:clamp(24px,3.3vw,48px);letter-spacing:1px;line-height:1.1}
+ body.is-training .phase-heading p{font-size:13px;margin-top:10px}
+ body.is-training .ring-wrap{
+  --ring-size:min(100%,calc(var(--training-height) - 174px));
+  grid-column:1;grid-row:1 / 6;width:var(--ring-size);height:auto;max-height:none;
+  aspect-ratio:1 / 1;justify-self:center;align-self:center;margin:0;
+ }
+ body.is-training .ring-text{gap:14px}
+ body.is-training .ring-text strong{font-size:clamp(42px,7.5vw,112px);letter-spacing:-2px}
+ body.is-training .ring-text span{font-size:12px;letter-spacing:1.2px}
+ body.is-training .timer-stats{grid-column:2;grid-row:3;padding:10px 0}
+ body.is-training .timer-stats strong{font-size:clamp(26px,3vw,40px)}
+ body.is-training .timer-stats strong span{font-size:18px}
+ body.is-training .timer-stats>div>span{font-size:11px;letter-spacing:1px}
+ body.is-training .next-phase{grid-column:2;grid-row:4;margin:0;min-height:52px;padding:13px 16px;gap:12px}
+ body.is-training .next-phase strong{font-size:15px;text-align:right}
+ body.is-training .timer-controls{grid-column:2;grid-row:5;margin:0;gap:12px}
+ body.is-training .timer-controls .primary,body.is-training .timer-controls .secondary{min-height:44px;height:100%;font-size:15px}
+ body.is-training .timer-controls .secondary{width:116px}
+ body.is-training .end-button{grid-column:2;grid-row:6;min-height:44px;margin:0;padding:8px;font-size:13px;align-self:center}
+ body.is-training .laps{grid-column:1;grid-row:6;align-self:stretch;max-height:44px;min-height:0;overflow:auto;padding:0 14px}
+ body.is-training .lap-item{padding:10px 0;gap:12px}
+ body.is-training .completion-screen{padding:24px 32px}
+ body.is-training .completed-mark{width:72px;height:72px;margin-bottom:20px}
+ body.is-training .completion-total{margin:20px 0 24px}
+ body.is-training .completion-screen>.primary,body.is-training .completion-screen>.secondary{max-width:440px}
+}
+
+/* Portrait phones remain naturally scrollable, including large text settings. */
+@media(max-width:760px){
+ body{padding:0;align-items:flex-start}
+ .shell{height:auto;min-height:100dvh}
+ .app{height:auto;min-height:100dvh;max-height:none}
+ .display-tools{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));justify-content:center;flex-wrap:wrap}
+ .display-tools button{font-size:11px;padding:8px 10px}
+ body.is-training{--training-height:100dvh}
+ body.is-training .shell{height:auto;min-height:100dvh;max-width:none}
+ body.is-training .app{height:auto;min-height:100dvh}
+ body.is-training .timer-screen{padding-top:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));overflow:visible}
+ body.is-training .phase-heading{margin-top:12px}
+ body.is-training .phase-heading p{margin-top:7px}
+ body.is-training .ring-wrap{width:min(320px,40dvh,calc(100vw - 60px));margin:18px auto}
+ body.is-training .ring-text strong{font-size:clamp(36px,15vw,64px);letter-spacing:-2px}
+ body.is-training .ring-text span{font-size:11px}
+ body.is-training .timer-stats{padding:0}
+ body.is-training .timer-stats>div>span{font-size:11px;letter-spacing:.8px}
+ body.is-training .next-phase{margin:18px 0 14px;min-height:44px;padding:12px;gap:12px}
+ body.is-training .timer-controls{margin-top:0}
+ body.is-training .end-button{min-height:44px;margin-top:4px}
+ body.is-training .completion-screen{height:auto;min-height:calc(100dvh - 52px);padding:28px 24px}
+ body.is-training .completion-total{margin:24px 0}
+}
+
+/* Height is the decisive breakpoint: a horizontal iPhone is not a small desktop. */
+@media(orientation:landscape) and (max-height:600px){
+ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:var(--bg);align-items:flex-start}
+ .shell{display:block;width:100%;max-width:none;height:auto;min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));border:0;border-radius:0;box-shadow:none}
+ .companion{display:none}
+ .app{height:auto;min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:none}
+ .app-header{height:52px;padding:0 20px}
+ .mobile-brand{display:block;font-size:20px}
+ .mobile-preview-note{display:none}
+ .content{padding:18px 24px;overflow:visible}
+ .display-tools{--display-toolbar-height:44px;min-height:44px;flex-wrap:nowrap;padding:0 12px;justify-content:flex-end}
+ .display-tools button{min-height:40px;font-size:11px;padding:7px 10px}
+ .bottom-nav{position:sticky;bottom:0;min-height:58px;padding:4px 20px;z-index:2}
+ .bottom-nav button{min-height:48px;flex-direction:row;justify-content:center;font-size:11px;padding:6px;gap:7px}
+ .bottom-nav button svg{width:19px;height:19px}
+ .intervals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+ .interval-row{min-height:65px}
+ .row-text strong{font-size:13px}
+ .row-text small{font-size:11px}
+ .row-value{font-size:25px}
+ .config-actions{display:flex;align-items:center;gap:16px}
+ .config-actions .primary{flex:1}
+ .config-actions .save-button{width:auto;min-width:150px;margin:0}
+ .profiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .more-screen .settings-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}
+ body.is-training{--training-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+ body.is-training .shell{height:var(--training-height);min-height:0}
+ body.is-training .app{height:100%;min-height:0}
+ body.is-training .display-tools{--display-toolbar-height:44px;min-height:44px}
+ body.is-training .timer-screen{
+  display:grid;grid-template-columns:minmax(0,43%) minmax(0,1fr);
+  grid-template-rows:44px minmax(24px,1fr) auto auto 44px 44px;
+  gap:5px 20px;padding:8px 16px;overflow:hidden;position:relative;flex:1;
+ }
+ body.is-training .timer-top{grid-column:2;grid-row:1;font-size:11px;gap:8px}
+ body.is-training .phase-heading{grid-column:2;grid-row:2;margin:0;align-self:center}
+ body.is-training .phase-heading>span{font-size:clamp(20px,3vw,28px);line-height:1.05;letter-spacing:1px}
+ body.is-training .phase-heading p{display:none}
+ body.is-training .ring-wrap{grid-column:1;grid-row:1 / 6;width:min(100%,calc(var(--training-height) - 112px));height:auto;aspect-ratio:1 / 1;max-height:none;margin:0;justify-self:center;align-self:center}
+ body.is-training .ring-text{gap:10px}
+ body.is-training .ring-text strong{font-size:clamp(34px,6.6vw,64px);letter-spacing:-1.8px}
+ body.is-training .ring-text span{font-size:11px;letter-spacing:.7px}
+ body.is-training .timer-stats{grid-column:2;grid-row:3;padding:4px 0}
+ body.is-training .timer-stats>div{gap:4px}
+ body.is-training .timer-stats strong{font-size:23px}
+ body.is-training .timer-stats strong span{font-size:13px}
+ body.is-training .timer-stats>div>span{font-size:11px;letter-spacing:.55px}
+ body.is-training .next-phase{grid-column:2;grid-row:4;min-height:36px;margin:0;padding:8px 11px;gap:8px}
+ body.is-training .next-phase>span{font-size:11px;letter-spacing:.55px}
+ body.is-training .next-phase strong{font-size:12px;text-align:right}
+ body.is-training .timer-controls{grid-column:2;grid-row:5;margin:0;gap:8px}
+ body.is-training .timer-controls .primary,body.is-training .timer-controls .secondary{min-height:44px;height:44px;padding:8px 12px;font-size:13px}
+ body.is-training .timer-controls .secondary{width:94px}
+ body.is-training .end-button{grid-column:2;grid-row:6;min-height:44px;margin:0;padding:8px;font-size:12px}
+ body.is-training .laps{grid-column:1;grid-row:6;max-height:44px;overflow:auto;min-height:0;align-self:stretch;padding:0 10px}
+ body.is-training .lap-item{padding:9px 0;gap:10px;font-size:11px}
+ body.is-training .completion-screen{min-height:0;height:100%;padding:14px 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:24px;row-gap:8px;align-content:center}
+ body.is-training .completed-mark{grid-column:1;grid-row:1 / 3;justify-self:center;width:70px;height:70px;margin:0}
+ body.is-training .completion-screen>.eyebrow{grid-column:2;grid-row:1;font-size:11px;align-self:end}
+ body.is-training .completion-screen h1{grid-column:2;grid-row:2;font-size:32px;margin:0}
+ body.is-training .completion-screen>p{grid-column:2;grid-row:3;font-size:11px;margin:0}
+ body.is-training .completion-total{grid-column:1;grid-row:3 / 5;margin:0}
+ body.is-training .completion-total strong{font-size:42px}
+ body.is-training .completion-screen>.primary{grid-column:2;grid-row:4;min-height:44px;margin:0}
+ body.is-training .completion-screen>.secondary{grid-column:2;grid-row:5;min-height:44px;margin:0}
+ .toast{bottom:12px}
+ dialog{max-height:calc(100dvh - 20px);overflow:auto;padding:18px 22px}
+ .duration-fields{margin:16px 0}
+ .duration-fields input{padding:8px 0;font-size:34px}
+ .count-fields{margin:18px 0}
+}
+@media(orientation:landscape) and (max-height:360px){
+ body.is-training .timer-screen{grid-template-rows:44px minmax(20px,1fr) auto 44px 44px;gap:4px 18px;padding:6px 12px}
+ body.is-training .next-phase{display:none}
+ body.is-training .timer-controls{grid-row:4}
+ body.is-training .end-button,body.is-training .laps{grid-row:5}
+ body.is-training .ring-wrap{grid-row:1 / 5;width:min(100%,calc(var(--training-height) - 108px))}
+ body.is-training .phase-heading>span{font-size:20px}
+ body.is-training .timer-stats strong{font-size:21px}
+ body.is-training .timer-stats>div>span{font-size:11px}
+ body.is-training .timer-top>span{font-size:11px}
+ #tvTimerButton{min-width:58px;padding:7px;font-size:11px}
+}
+
+/* Presentation mode fills the receiving browser and keeps the ring circular. */
+body.presentation-mode{
+ --training-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+ background:var(--bg);align-items:flex-start;
+}
+body.presentation-mode .shell{width:100%;max-width:none;height:var(--training-height);min-height:0;display:block;border:0;border-radius:0;box-shadow:none}
+body.presentation-mode .companion,body.presentation-mode .app-header,body.presentation-mode .mobile-preview-note,body.presentation-mode .bottom-nav{display:none}
+body.presentation-mode .app{height:100%;min-height:0;max-height:none}
+body.presentation-mode .display-tools{--display-toolbar-height:52px;min-height:52px;padding:4px 20px}
+body.presentation-mode #tvModeButton,body.presentation-mode #tvTimerButton{display:none}
+body.presentation-mode .content:not(.timer-screen):not(.completion-screen){overflow:auto;width:min(960px,100%);align-self:center;flex:1}
+body.presentation-mode .completion-screen{height:100%;min-height:0;overflow:auto}
+body.presentation-mode .timer-screen{min-height:0}
+:fullscreen{background:var(--bg)}
+@media(min-width:761px) and (min-height:601px){
+ body.presentation-mode .timer-screen{grid-template-columns:minmax(0,48%) minmax(0,1fr);grid-template-rows:44px minmax(60px,1fr) auto auto clamp(56px,7vh,80px) 44px;gap:clamp(14px,2vh,24px) clamp(30px,4vw,80px);padding:clamp(24px,3vh,48px) clamp(28px,4vw,80px)}
+ body.presentation-mode .ring-wrap{width:min(100%,calc(var(--training-height) - 190px));grid-row:1 / 6}
+ body.presentation-mode .ring-text strong{font-size:clamp(76px,10vw,180px);letter-spacing:-4px}
+ body.presentation-mode .ring-text span{font-size:clamp(13px,1.2vw,20px);letter-spacing:2px}
+ body.presentation-mode .phase-heading>span{font-size:clamp(36px,4.4vw,72px)}
+ body.presentation-mode .phase-heading p{font-size:clamp(15px,1.4vw,24px)}
+ body.presentation-mode .timer-stats strong{font-size:clamp(38px,4.2vw,72px)}
+ body.presentation-mode .timer-stats strong span{font-size:clamp(22px,2.1vw,34px)}
+ body.presentation-mode .timer-stats>div>span{font-size:clamp(12px,1.2vw,20px);letter-spacing:1.5px}
+ body.presentation-mode .next-phase{min-height:60px;padding:18px 22px}
+ body.presentation-mode .next-phase>span{font-size:clamp(12px,1vw,18px)}
+ body.presentation-mode .next-phase strong{font-size:clamp(18px,1.7vw,28px)}
+ body.presentation-mode .timer-controls .primary,body.presentation-mode .timer-controls .secondary{font-size:clamp(18px,1.7vw,28px);min-height:56px}
+ body.presentation-mode .timer-controls .secondary{width:clamp(130px,12vw,210px)}
+ body.presentation-mode .end-button{font-size:16px}
+ body.presentation-mode .laps{font-size:14px}
+}
+@media(orientation:landscape) and (max-height:600px){
+ body.presentation-mode .display-tools{--display-toolbar-height:44px;min-height:44px;padding:0 12px}
+}
+@media(orientation:portrait) and (max-width:760px){
+ body.presentation-mode .shell{height:auto;min-height:var(--training-height)}
+ body.presentation-mode .app{height:auto;min-height:var(--training-height)}
+ body.presentation-mode .content:not(.timer-screen):not(.completion-screen){overflow:visible}
+}
+@media(orientation:landscape) and (max-height:300px){
+ body.is-training .timer-screen{grid-template-rows:minmax(24px,1fr) auto 44px 44px;gap:4px 16px}
+ body.is-training .timer-top{display:none}
+ body.is-training .phase-heading{grid-row:1}
+ body.is-training .timer-stats{grid-row:2}
+ body.is-training .timer-controls{grid-row:3}
+ body.is-training .end-button,body.is-training .laps{grid-row:4}
+ body.is-training .ring-wrap{grid-row:1 / 4;width:min(100%,calc(var(--training-height) - 108px))}
+ body.is-training .ring-text strong{font-size:clamp(28px,5.5vw,42px)}
+ body.is-training .ring-text span{font-size:11px;letter-spacing:.2px}
+}
+
+/* Longer hour-format times keep the same circular frame. */
+.timer-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+body.is-training .ring-text strong.long-time{font-size:clamp(30px,5.8vw,80px);letter-spacing:-1.5px}
+@media(orientation:portrait) and (max-width:760px){body.is-training .ring-text strong.long-time{font-size:clamp(28px,11vw,52px)}}
+@media(min-width:761px) and (min-height:601px){body.presentation-mode .ring-text strong.long-time{font-size:clamp(54px,7.2vw,128px)}}

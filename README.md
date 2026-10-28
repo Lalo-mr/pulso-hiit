@@ -20,6 +20,22 @@ No necesitas instalar herramientas ni contratar un dominio.
 
 Si no escuchas la prueba, comprueba el volumen, la salida de audio y que el iPhone tenga una voz en español disponible.
 
+## Vista horizontal y TV
+
+Al girar el iPhone, el aro y los controles se colocan lado a lado. El panel decorativo no aparece durante el entrenamiento.
+
+- **Modo TV** amplía el temporizador y aprovecha toda el área disponible.
+- **Pantalla completa** oculta el navegador cuando el dispositivo lo permite. En iPhone, abrir Pulso desde el icono de inicio permite evitar las barras de Safari.
+- **Ayuda TV** explica cómo duplicar el iPhone con AirPlay. Gíralo en horizontal y usa Centro de control → Duplicar pantalla. La TV compatible y el iPhone deben estar en la misma red wifi.
+- También puedes abrir esta dirección en el navegador de la TV o en una computadora conectada a ella.
+- En duplicación, las bandas negras y los bordes dependen también de la proporción del iPhone y los ajustes de imagen de la TV. Pulso conserva la proporción del aro; no puede controlar el ajuste físico del televisor.
+
+## Elegir voz masculina o femenina
+
+En **Más → Voz de la guía**, elige Automática, Femenina o Masculina y pulsa **Probar voz**. También puedes elegir una voz específica por nombre. La elección queda guardada en el dispositivo.
+
+La selección utiliza las voces en español que ofrece el navegador. Si no se identifica el tipo elegido, Pulso lo indica y muestra la alternativa que usará. No descarga voces ni simula el género cambiando el tono.
+
 ## Añadir a la pantalla de inicio
 
 En Safari, toca **Compartir → Añadir a pantalla de inicio**. Si aparece **Abrir como app web**, actívalo. Después toca **Añadir**.
@@ -34,14 +50,14 @@ En **Más** también encontrarás las instrucciones de instalación. Cuando apar
 - Borrar los datos del sitio puede eliminar rutinas e historial.
 - El código de la app y la página son públicos. Tus entrenamientos guardados localmente no forman parte del repositorio.
 - No necesitas cuenta para usar Pulso. No incluye anuncios, analítica ni servidores de datos personales.
-- Si actualizas la app, cierra todas sus ventanas y vuelve a abrirla para activar la nueva versión; no se recargará a mitad del entrenamiento.
+- Cuando se publique una actualización, recarga Pulso para verla. La descarga de la nueva versión no recarga ni interrumpe un entrenamiento que ya esté en marcha.
 
 ## Desarrollo y comprobaciones
 
 HTML, CSS y JavaScript sin dependencias ni proceso de compilación. Rutas relativas compatibles con sitios de proyecto de GitHub Pages.
 
 ```sh
-node --test engine.test.cjs pwa.test.cjs app.test.cjs
+node --test engine.test.cjs pwa.test.cjs app.test.cjs voices.test.cjs display.test.cjs
 node --check app.js
 node --check pwa.js
 node --check sw.js

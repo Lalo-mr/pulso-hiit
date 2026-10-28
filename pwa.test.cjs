@@ -6,25 +6,40 @@ const path = require('node:path');
 const vm = require('node:vm');
 const root = __dirname;
 const code = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-function worker(scope) {
-  const listeners = {}, stores = new Map(), network = [];
-  let claimed = 0;
+function worker(scope, options = {}) {
+  const listeners = {}, stores = new Map(), network = [], events = [], navigations = [];
+  let claimed = 0, skippedWaiting = 0;
   const caches = {
     async open(name) {
       if (!stores.has(name)) stores.set(name, new Map());
       const items = stores.get(name);
       return {
-        async addAll(urls) { for (const url of urls) items.set(url, {body:'cached:' + url}); },
+        async addAll(urls) {
+          events.push('precache-start');
+          if(options.onPrecacheStart) options.onPrecacheStart();
+          if(options.precacheGate) await options.precacheGate;
+          if(options.precacheFails) throw new Error('precache failed');
+          for (const url of urls) items.set(url, {body:'cached:' + url});
+          events.push('precache-complete');
+        },
         async match(url) { return items.get(url); }
       };
     },
     async keys() { return [...stores.keys()]; },
     async delete(name) { return stores.delete(name); }
   };
-  const self = {registration:{scope}, clients:{async claim(){ claimed++; }}, addEventListener(name, fn){listeners[name]=fn;}};
+  const self = {
+    registration:{scope},
+    clients:{
+      async claim(){ claimed++; events.push('clients-claimed'); },
+      async matchAll(){ return [{async navigate(url){navigations.push(url);}}]; }
+    },
+    async skipWaiting(){ skippedWaiting++; events.push('skip-waiting'); },
+    addEventListener(name, fn){listeners[name]=fn;}
+  };
   vm.runInNewContext(code,{self,caches,URL,Set,fetch:async request=>{network.push(request.url);throw new Error('offline');}});
   return {
-    stores, network, claimed:()=>claimed,
+    stores, network, events, navigations, claimed:()=>claimed, skippedWaiting:()=>skippedWaiting,
     async lifecycle(name) { let pending;listeners[name]({waitUntil(p){pending=p;}});await pending; },
     async get(url, method='GET') {
       let response;
@@ -37,7 +52,7 @@ for (const pathname of ['/', '/pulso-hiit/']) {
   test('offline shell works at ' + pathname + ' without network', async () => {
     const w=worker('https://lalo-mr.github.io'+pathname);
     await w.lifecycle('install');await w.lifecycle('activate');
-    for(const file of ['', 'index.html','app.js','engine.js','pwa.js','styles.css','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png']){
+    for(const file of ['', 'index.html','app.js','engine.js','voices.js','display.js','pwa.js','styles.css','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png']){
       const url='https://lalo-mr.github.io'+pathname+file;
       assert.equal((await w.get(url)).body,'cached:'+url);
     }
@@ -88,4 +103,33 @@ test('manual iPhone install and audible test controls are reachable',()=>{
  for(const id of ['testVoiceButton','installHelpButton','installHelpDialog','offlineStatus'])assert.match(html,new RegExp('id="'+id+'"'));
  assert.match(html,/apple-mobile-web-app-capable/);assert.match(html,/apple-touch-icon/);
  assert.match(html,/Al bloquear el iPhone o cambiar de app/);assert.doesNotMatch(html,/Vista previa/);
+});
+
+
+test('update waits for the full shell before activation and never navigates a running client', async()=>{
+  let complete, start;
+  const gate = new Promise(resolve=>{complete=resolve;});
+  const started = new Promise(resolve=>{start=resolve;});
+  const w=worker('https://lalo-mr.github.io/pulso-hiit/',{precacheGate:gate,onPrecacheStart:start});
+  const installing=w.lifecycle('install');
+  await started;
+  assert.deepEqual(w.events,['precache-start']);
+  assert.equal(w.skippedWaiting(),0);
+  assert.equal(w.claimed(),0);
+  complete();await installing;
+  assert.deepEqual(w.events,['precache-start','precache-complete','skip-waiting']);
+  await w.lifecycle('activate');
+  assert.equal(w.claimed(),1);
+  assert.deepEqual(w.navigations,[]);
+  assert.deepEqual(w.events,['precache-start','precache-complete','skip-waiting','clients-claimed']);
+  assert.match((await w.get('https://lalo-mr.github.io/pulso-hiit/voices.js')).body,/cached:/);
+  assert.match((await w.get('https://lalo-mr.github.io/pulso-hiit/display.js')).body,/cached:/);
+});
+
+test('failed precache does not skip waiting or claim current clients',async()=>{
+  const w=worker('https://lalo-mr.github.io/pulso-hiit/',{precacheFails:true});
+  await assert.rejects(w.lifecycle('install'),/precache failed/);
+  assert.equal(w.skippedWaiting(),0);
+  assert.equal(w.claimed(),0);
+  assert.deepEqual(w.navigations,[]);
 });
