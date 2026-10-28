@@ -6,8 +6,8 @@
   else root.PulsoVoices = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const femaleNames = new Set(['monica', 'paulina', 'angelica', 'luciana', 'marisol', 'elvira', 'dalia', 'laura', 'sabina']);
-  const maleNames = new Set(['jorge', 'juan', 'diego', 'carlos', 'rodrigo', 'antonio', 'pablo', 'alvaro', 'alonso']);
+  const femaleNames = new Set(['monica', 'paulina', 'angelica', 'luciana', 'marisol', 'elvira', 'dalia', 'laura', 'sabina', 'helena']);
+  const maleNames = new Set(['jorge', 'juan', 'diego', 'carlos', 'rodrigo', 'antonio', 'pablo', 'alvaro', 'alonso', 'raul']);
 
   function language(voice) {
     return typeof voice?.lang === 'string' ? voice.lang.trim().replace(/_/g, '-').toLowerCase() : '';

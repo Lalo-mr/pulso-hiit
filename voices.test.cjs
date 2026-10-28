@@ -98,3 +98,16 @@ test('browser global and CommonJS expose the same public helper API', () => {
   assert.deepEqual(Object.keys(context.PulsoVoices).sort(), ['choose','gender','key','listSpanish']);
   assert.equal(context.PulsoVoices.choose([voice('Jorge')],{gender:'male'}).matched,true);
 });
+
+
+test('Windows Spanish Raul/Sabina and Helena use their documented voice gender', () => {
+  const raul = voice('Microsoft Raul - Spanish (Mexico)','es-MX',{voiceURI:'Microsoft Raul - Spanish (Mexico)'});
+  const sabina = voice('Microsoft Sabina - Spanish (Mexico)','es-MX',{voiceURI:'Microsoft Sabina - Spanish (Mexico)'});
+  const helena = voice('Microsoft Helena - Spanish (Spain)','es-ES');
+  assert.equal(V.gender(raul),'male');
+  assert.equal(V.gender(voice('Microsoft Raúl - Spanish (Mexico)')),'male');
+  assert.equal(V.gender(sabina),'female');
+  assert.equal(V.gender(helena),'female');
+  assert.equal(V.choose([sabina,raul],{gender:'male'}).voice,raul);
+  assert.equal(V.choose([raul,sabina],{gender:'female'}).voice,sabina);
+});
