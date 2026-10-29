@@ -1,7 +1,7 @@
 /* Pulso HIIT web: sin dependencias ni cuentas. iOS puede suspender el audio web. */
 (function () {
 'use strict';
-const E = PulsoEngine, Voices = PulsoVoices, $ = id => document.getElementById(id);
+const E = PulsoEngine, $ = id => document.getElementById(id);
 const fields = {
  prepare: ['Prepárate','Cuenta atrás antes de empezar','prepare'],
  work: ['Entrenar','Da lo mejor de ti durante este tiempo','work'],
@@ -17,8 +17,8 @@ const defaults = {
  rounds:{id:null,name:'Mis rondas',mode:'rounds',prepare:5,work:60,rest:0,rounds:3,cycles:1,cycleRest:0,cooldown:0,lap:20},
  stopwatch:{id:null,name:'Mi cronómetro',mode:'stopwatch',prepare:0,work:20,rest:0,rounds:1,cycles:1,cycleRest:0,cooldown:0,lap:20}
 };
-const defaultPrefs = {sound:true,voice:true,flash:false,keepAwake:true,voiceGender:'auto',voiceURI:''};
-let drafts = structuredClone(defaults), profiles = [], history = [], prefs = {...defaultPrefs}, currentMode='tabata', session=null, lastWorkout=null, editKey=null, frame=null, audio=null, wakeLock=null, toastTimer=null;
+const defaultPrefs = {sound:true,voice:true,flash:false,keepAwake:true,voiceGender:'female',voiceURI:''};
+let drafts = structuredClone(defaults), profiles = [], history = [], prefs = {...defaultPrefs}, currentMode='tabata', session=null, lastWorkout=null, editKey=null, frame=null, audio=null, guide=null, audioActivation=Promise.resolve(), wakeLock=null, toastTimer=null;
 function uid(){return globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);}
 function node(tag,className,text){const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;}
 function icon(name){const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('aria-hidden','true');const u=document.createElementNS(s.namespaceURI,'use');u.setAttribute('href','#i-'+name);s.append(u);return s;}
@@ -32,7 +32,8 @@ try{
  if(Array.isArray(s.profiles))profiles=s.profiles.flatMap(p=>{try{return [cleanWorkout(p)];}catch{return [];}});
  if(Array.isArray(s.history))history=s.history.filter(h=>h && typeof h.id==='string' && typeof h.name==='string' && h.name.length<=60 && Number.isFinite(h.duration) && h.duration>=0 && typeof h.date==='string' && !Number.isNaN(Date.parse(h.date))).map(h=>({...h,name:h.name.slice(0,60)}));
  for(const k of Object.keys(defaultPrefs))if(typeof s.prefs?.[k]===typeof defaultPrefs[k])prefs[k]=s.prefs[k];
- if(!['auto','female','male'].includes(prefs.voiceGender))prefs.voiceGender='auto';
+ if(!['female','male'].includes(prefs.voiceGender))prefs.voiceGender='female';
+ prefs.voiceURI='';
  if(prefs.voiceURI.length>1000)prefs.voiceURI='';
  }} else {
  profiles=[{...defaults.tabata,id:uid(),name:'Tabata esencial',cycles:1,cycleRest:0,cooldown:0},{...defaults.rounds,id:uid(),name:'Tres rondas · box'}];
@@ -97,56 +98,53 @@ $('saveButton').addEventListener('click',()=>{
 function renderMore(){
  $('preferences').replaceChildren();
  const definitions={sound:['Señales de sonido','Cambios de fase y cuenta atrás de 3 segundos.'],voice:['Guía por voz','Escucha la fase y la ronda en español.'],flash:['Destello de pantalla','Un destello suave al cambiar de intervalo.'],keepAwake:['Mantener pantalla activa','Mientras entrenas, si el navegador lo permite.']};
- for(const [key,[title,detail]]of Object.entries(definitions)){const label=node('label','preference'),copy=node('span');copy.append(node('strong','',title),node('small','',detail));const input=node('input','toggle');input.type='checkbox';input.checked=prefs[key];input.addEventListener('change',()=>{prefs[key]=input.checked;persist();});label.append(copy,input);$('preferences').append(label);}
+ for(const [key,[title,detail]]of Object.entries(definitions)){const label=node('label','preference'),copy=node('span');copy.append(node('strong','',title),node('small','',detail));const input=node('input','toggle');input.type='checkbox';input.checked=prefs[key];input.addEventListener('change',()=>{prefs[key]=input.checked;if(key==='voice'&&!input.checked)stopGuide();persist();});label.append(copy,input);$('preferences').append(label);}
  renderVoiceControls();
  $('historyCount').textContent=history.length+' sesiones';$('history').replaceChildren();
  if(!history.length){const empty=node('div','empty-card');empty.append(icon('clock'),node('p','','Tu próxima sesión empieza aquí. Al terminar, la encontrarás en tu historial.'));$('history').append(empty);}
  for(const h of [...history].reverse()){const item=node('div','history-item'),mark=node('div','history-mark');mark.append(icon(h.completed?'check':'clock'));const copy=node('div');copy.append(node('strong','',h.name),node('small','',new Date(h.date).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+(h.completed?'Completada':'Finalizada antes de tiempo')+(h.skipped?' · '+h.skipped+' saltos':'')));const time=node('time','',E.format(h.duration));time.dateTime='PT'+Math.round(h.duration)+'S';item.append(mark,copy,time);$('history').append(item);}
 }
-function availableVoices(){return 'speechSynthesis'in window?speechSynthesis.getVoices():[];}
-function selectedVoice(){return Voices.choose(availableVoices(),{gender:prefs.voiceGender,voiceURI:prefs.voiceURI});}
+function selectedGender(){return prefs.voiceGender==='male'?'male':'female';}
+function voiceName(){return selectedGender()==='male'?'masculina':'femenina';}
+function renderVoiceStatus(){
+ const status=$('voiceChoiceStatus');if(!status)return;
+ const state=guide?guide.state(selectedGender()):'idle';
+ status.textContent=state==='loading'?'Preparando la voz '+voiceName()+'…':state==='error'?'No se pudo cargar la voz '+voiceName()+'. Conéctate a internet y pulsa Probar voz para reintentar.':state==='ready'?'Voz '+voiceName()+' lista. Escúchala con Probar voz.':'Voz '+voiceName()+' incluida. Pulsa Probar voz para escucharla.';
+}
 function renderVoiceControls(){
  const holder=$('voiceChoices');holder.replaceChildren();
  const fieldset=node('fieldset','voice-select');fieldset.append(node('legend','','Voz de la guía'));
- const typeLabel=node('label','voice-field','Tipo de voz'),type=node('select');type.id='voiceGenderSelect';type.setAttribute('aria-label','Tipo de voz');
- for(const [value,title]of [['auto','Automática'],['female','Femenina'],['male','Masculina']]){const o=node('option','',title);o.value=value;type.append(o);}
- type.value=prefs.voiceGender;type.addEventListener('change',()=>{prefs.voiceGender=type.value;prefs.voiceURI='';persist();renderVoiceControls();});typeLabel.append(type);fieldset.append(typeLabel);
- const voiceLabel=node('label','voice-field','Elegir una voz por nombre'),select=node('select');select.id='deviceVoiceSelect';select.setAttribute('aria-label','Voz disponible en el dispositivo');
- const automatic=node('option','','Según el tipo elegido');automatic.value='';select.append(automatic);
- for(const voice of Voices.listSpanish(availableVoices())){const g=Voices.gender(voice),suffix=g==='male'?' · masculina':g==='female'?' · femenina':'';const o=node('option','',voice.name+' · '+voice.lang+suffix);o.value=Voices.key(voice);select.append(o);}
- if(prefs.voiceURI&&!Voices.listSpanish(availableVoices()).some(v=>Voices.key(v)===prefs.voiceURI)){const unavailable=node('option','','Voz guardada no disponible aquí');unavailable.value=prefs.voiceURI;unavailable.disabled=true;select.append(unavailable);}
- select.value=prefs.voiceURI;
- select.addEventListener('change',()=>{prefs.voiceURI=select.value;if(prefs.voiceURI)prefs.voiceGender='auto';persist();renderVoiceControls();});voiceLabel.append(select);fieldset.append(voiceLabel);
- const status=node('p','muted');status.id='voiceChoiceStatus';status.setAttribute('role','status');const result=selectedVoice();
- if(result.reason==='no-spanish-voices')status.textContent='El navegador aún no muestra voces en español. Pulsa Probar voz; si no suena, comprueba las voces disponibles en los ajustes del iPhone.';
- else if(result.reason==='gender-unavailable')status.textContent='No se detectó una voz '+(prefs.voiceGender==='male'?'masculina':'femenina')+' en español. Se usará '+result.voice.name+'. Puedes elegir otra por nombre y escucharla con Probar voz.';
- else if(result.reason==='missing-selected-voice')status.textContent='La voz guardada no está disponible en este dispositivo. Se usará '+(result.voice?.name||'la voz del sistema')+'.';
- else status.textContent='Voz seleccionada: '+result.voice.name+' · '+result.voice.lang+'. Escúchala con Probar voz.';
- fieldset.append(status);holder.append(fieldset);
+ for(const [value,title,id]of [['female','Femenina','voiceFemaleInput'],['male','Masculina','voiceMaleInput']]){
+  const label=node('label','voice-option'),input=node('input');input.type='radio';input.name='guideVoice';input.id=id;input.value=value;input.checked=selectedGender()===value;
+  input.addEventListener('change',()=>{if(!input.checked)return;stopGuide();prefs.voiceGender=value;prefs.voiceURI='';persist();$('voiceFemaleInput').checked=value==='female';$('voiceMaleInput').checked=value==='male';initAudio();if(guide)guide.load(value).catch(()=>{});renderVoiceStatus();});
+  label.append(input,node('span','',title));fieldset.append(label);
+ }
+ const status=node('p','muted');status.id='voiceChoiceStatus';status.setAttribute('role','status');fieldset.append(status);
+ const credit=node('a','voice-credit','Créditos de las voces');credit.href='audio/CREDITOS.md';credit.target='_blank';credit.rel='noopener';fieldset.append(credit);
+ holder.append(fieldset);renderVoiceStatus();
 }
-if('speechSynthesis'in window&&speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',()=>{if(!$('moreScreen').hidden)renderVoiceControls();});
-function initAudio(){try{const A=window.AudioContext||window.webkitAudioContext;if(A&&!audio)audio=new A();if(audio?.state==='suspended')audio.resume().catch(()=>{});}catch{}}
+let lastVoiceError=-Infinity;
+function initAudio(){
+ try{
+  const A=window.AudioContext||window.webkitAudioContext;if(A&&(!audio||audio.state==='closed')){audio=new A();guide=null;}
+  // Resume inside the user's click, before fetching or decoding any voice.
+  audioActivation=audio&&audio.state!=='running'?audio.resume().catch(()=>{}):Promise.resolve();
+  if(audio&&!guide&&typeof PulsoAudio!=='undefined')guide=PulsoAudio.create({context:audio,activation:()=>audioActivation,onState(voice){if(voice===selectedGender())renderVoiceStatus();},onError(error,voice){if(voice!==selectedGender())return;renderVoiceStatus();if(Date.now()-lastVoiceError>60000){lastVoiceError=Date.now();toast('No se pudo reproducir la voz '+voiceName()+'. Comprueba la conexión y el volumen; después pulsa Probar voz.');}}});
+ }catch{}
+}
+function stopGuide(){if(guide)guide.stop();}
+function playGuide(keys,force=false){
+ if((!prefs.voice&&!force)||document.hidden)return;
+ if(!guide){if(force)toast('Este navegador no permite reproducir la guía. Abre Pulso en Safari y pulsa Probar voz.');return;}
+ guide.play(keys,selectedGender());
+}
+function announcePhase(phase,isStopwatch,workout){
+ const keys=[isStopwatch&&phase.kind==='work'?'stopwatch':phase.kind];
+ if(!isStopwatch&&phase.kind==='work')keys.push('round','n'+phase.round,'of','n'+workout.rounds);
+ playGuide(keys);
+}
 function beep(freq=880,length=.18){if(!prefs.sound||document.hidden||!audio)return;try{const t=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();o.frequency.value=freq;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+length);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+length+.02);}catch{}}
-let lastVoiceError = -Infinity;
-function speak(text,force=false){
- if((!prefs.voice&&!force)||document.hidden)return false;
- if(!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window)){if(force)toast('Este navegador no ofrece guía por voz. Abre Pulso en Safari.');return false;}
- speechSynthesis.cancel();
- const utterance=new SpeechSynthesisUtterance(text);utterance.lang='es-MX';utterance.rate=1.02;
- const result=selectedVoice(),voice=result.voice;
- if(voice){utterance.voice=voice;utterance.lang=voice.lang;}
- if(force&&result.reason==='gender-unavailable')toast('Este dispositivo no ofrece una voz '+(prefs.voiceGender==='male'?'masculina':'femenina')+' identificada en español. Escucharás '+voice.name+'.');
- utterance.onerror=event=>{
-  if(['interrupted','canceled'].includes(event.error))return;
-  if(force||Date.now()-lastVoiceError>60000){lastVoiceError=Date.now();toast('No se pudo reproducir la voz. Comprueba el volumen y prueba desde Safari con una voz en español disponible.');}
- };
- if(speechSynthesis.paused)speechSynthesis.resume();
- speechSynthesis.speak(utterance);return true;
-}
-$('testVoiceButton').addEventListener('click',()=>{
- initAudio();
- speak('Hola. Soy la guía de Pulso. Prepárate, entrena y descansa. Así escucharás los cambios de intervalo.',true);
-});
+$('testVoiceButton').addEventListener('click',()=>{initAudio();playGuide(['test'],true);});
 function flash(){if(!prefs.flash||document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const n=$('screenFlash');n.classList.remove('flash');void n.offsetWidth;n.classList.add('flash');}
 async function requestWake(){if(!prefs.keepAwake||!('wakeLock'in navigator)||document.hidden||!session?.clock.running)return;try{wakeLock=await navigator.wakeLock.request('screen');}catch{}}
 function releaseWake(){if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null;}}
@@ -154,7 +152,7 @@ const colors={prepare:'#efcf69',work:'#c0ef58',rest:'#f59379',cycleRest:'#efcf69
 function setStat(id,value,total){const n=$(id);n.replaceChildren(document.createTextNode(String(value)));if(total)n.append(node('span','', ' / '+total));}
 function startWorkout(w){
  try{w=cleanWorkout({...w});}catch(e){toast(e.message);return;}
- if(frame)cancelAnimationFrame(frame);initAudio();
+ if(frame)cancelAnimationFrame(frame);stopGuide();initAudio();
  const now=Date.now(),phases=E.buildPhases(w),clock=new E.Clock(phases),actualClock=new E.Clock([]);
  clock.resume(now);actualClock.resume(now);session={workout:{...w},clock,actualClock,phases,started:now,lastPhase:null,lastSecond:null,lastPeriodic:0,laps:[],skipped:0,skippedSeconds:0,lastTick:now};
  lastWorkout={...w};$('activeRoutine').textContent=w.name;$('laps').replaceChildren();$('skipButton').disabled=false;showScreen('timer');$('pauseButton').replaceChildren(icon('pause'),document.createTextNode('Pausar'));
@@ -184,7 +182,7 @@ function tick(){
  $('remainingTotal').nextElementSibling.textContent=isStopwatch?'ACUMULADO':'POR TERMINAR';
  if(isStopwatch){$('nextPhase').textContent=phase.kind==='prepare'?'Cronómetro libre':w.lap?'Aviso en '+E.format(w.lap-(remaining%w.lap)):'Sin aviso periódico';}
  else{const next=session.phases[snap.index+1];$('nextPhase').textContent=next?next.title+' · '+E.format(next.duration):'¡Entrenamiento completado!';}
- if(session.lastPhase!==phaseKey){if(clock.running){beep(phase.kind==='work'?1000:660,.28);speak(isStopwatch?phase.title:phase.title+(phase.kind==='work'?'. Ronda '+phase.round+' de '+w.rounds+'.':''));flash();}session.lastPhase=phaseKey;session.lastSecond=null;}
+ if(session.lastPhase!==phaseKey){if(clock.running){beep(phase.kind==='work'?1000:660,.28);announcePhase(phase,isStopwatch,w);flash();}session.lastPhase=phaseKey;session.lastSecond=null;}
  else if(clock.running&&session.lastSecond!==seconds&&seconds>0&&seconds<=3&&(!isStopwatch||phase.kind==='prepare'))beep(600,.1);
  if(isStopwatch&&phase.kind!=='prepare'&&w.lap>0){const periodic=Math.floor(remaining/w.lap);if(periodic>session.lastPeriodic){if(clock.running)beep(950,.3);session.lastPeriodic=periodic;}}
  session.lastSecond=seconds;session.lastTick=now;
@@ -192,7 +190,7 @@ function tick(){
 }
 function togglePause(){
  if(!session)return;const now=Date.now();
- if(session.clock.running){session.clock.pause(now);session.actualClock.pause(now);$('skipButton').disabled=true;if('speechSynthesis'in window)speechSynthesis.cancel();releaseWake();$('pauseButton').replaceChildren(icon('play'),document.createTextNode('Continuar'));}
+ if(session.clock.running){session.clock.pause(now);session.actualClock.pause(now);$('skipButton').disabled=true;stopGuide();releaseWake();$('pauseButton').replaceChildren(icon('play'),document.createTextNode('Continuar'));}
  else{initAudio();session.clock.resume(now);session.actualClock.resume(now);session.lastPhase=null;$('skipButton').disabled=false;$('pauseButton').replaceChildren(icon('pause'),document.createTextNode('Pausar'));requestWake();}
 }
 function addLap(){
@@ -203,7 +201,7 @@ function addLap(){
 }
 function skip(){
  if(!session||!session.clock.running)return;if(session.workout.mode==='stopwatch'){addLap();return;}
- const now=Date.now(),before=session.clock.snapshot(now);if(before.done){finish(true);return;}session.skipped++;session.skippedSeconds+=before.remaining;session.clock.skip(now);session.lastPhase=null;
+ stopGuide();const now=Date.now(),before=session.clock.snapshot(now);if(before.done){finish(true);return;}session.skipped++;session.skippedSeconds+=before.remaining;session.clock.skip(now);session.lastPhase=null;
 }
 async function endSession(){
  const endingSession=session;if(!endingSession)return;
@@ -212,27 +210,26 @@ async function endSession(){
 }
 function finish(completed){
  if(!session)return;const s=session;session=null;if($('confirmDialog').open)$('confirmDialog').close('cancel');if(frame)cancelAnimationFrame(frame);frame=null;
- const now=Date.now();s.actualClock.pause(now);s.clock.pause(now);releaseWake();if('speechSynthesis'in window)speechSynthesis.cancel();
+ const now=Date.now();s.actualClock.pause(now);s.clock.pause(now);releaseWake();stopGuide();
  const duration=s.workout.mode==='stopwatch'?Math.max(0,s.actualClock.elapsed(now)-s.workout.prepare):E.recordedDuration(s.actualClock.elapsed(now),s.clock.total,s.skippedSeconds);
  const h={id:uid(),name:s.workout.name,mode:s.workout.mode,duration,date:new Date(s.started).toISOString(),completed,skipped:s.skipped,laps:s.laps};history.push(h);persist();
  $('completionTitle').textContent=completed?'¡Lo hiciste!':'Buen trabajo.';
  $('completionMessage').textContent=completed?(s.skipped?'Sesión finalizada · '+s.skipped+' intervalos saltados.':'Entrenamiento completado. Tiempo para recuperar.'):'Tu esfuerzo de hoy ya está en el historial.';
  $('completionTime').textContent=E.format(duration);showScreen('completion');
- if(completed){beep(1100,.45);speak('Entrenamiento completado. Buen trabajo.');flash();}
+ if(completed){beep(1100,.45);playGuide(['completed']);flash();}
  $('backButton').focus();
 }
 $('startButton').addEventListener('click',()=>startWorkout(drafts[currentMode]));
 $('pauseButton').addEventListener('click',togglePause);$('skipButton').addEventListener('click',skip);
-$('closeTimer').addEventListener('click',endSession);$('endButton').addEventListener('click',endSession);
+$('endButton').addEventListener('click',endSession);
 $('backButton').addEventListener('click',()=>selectMode(currentMode));
 $('againButton').addEventListener('click',()=>{if(lastWorkout)startWorkout(lastWorkout);});
-$('settingsButton').addEventListener('click',()=>selectMode('more'));
 $('welcomeStartButton').addEventListener('click',()=>{
  document.body.classList.remove('is-welcome');selectMode(currentMode);document.querySelector('.app').focus({preventScroll:true});
 });
 document.querySelector('.mobile-brand').addEventListener('click',ev=>{ev.preventDefault();if(!session)document.body.classList.add('is-welcome');});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>selectMode(b.dataset.mode)));
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if('speechSynthesis'in window)speechSynthesis.cancel();releaseWake();}else if(session){requestWake();}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopGuide();releaseWake();}else if(session){requestWake();}});
 document.addEventListener('keydown',ev=>{if(session&&ev.code==='Space'&&!document.querySelector('dialog[open]')&&!['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)){ev.preventDefault();togglePause();}});
 $('exportButton').addEventListener('click',()=>{
  const blob=new Blob([JSON.stringify({version:1,profiles,history,prefs},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download='pulso-copia-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Copia de seguridad exportada');

@@ -52,7 +52,7 @@ for (const pathname of ['/', '/pulso-hiit/']) {
   test('offline shell works at ' + pathname + ' without network', async () => {
     const w=worker('https://lalo-mr.github.io'+pathname);
     await w.lifecycle('install');await w.lifecycle('activate');
-    for(const file of ['', 'index.html','app.js','engine.js','voices.js','display.js','pwa.js','styles.css','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png']){
+    for(const file of ['', 'index.html','app.js','engine.js','voices.js','voice-audio.js','audio/manifest.json','audio/male.mp3','audio/female.mp3','audio/CREDITOS.md','display.js','pwa.js','styles.css','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png']){
       const url='https://lalo-mr.github.io'+pathname+file;
       assert.equal((await w.get(url)).body,'cached:'+url);
     }

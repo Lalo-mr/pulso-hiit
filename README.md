@@ -18,7 +18,7 @@ No necesitas instalar herramientas ni contratar un dominio.
 3. Para una prueba de 56 segundos configura: preparación 5 s, entrenar 8 s, descansar 4 s, 2 rondas, 2 ciclos, descanso entre ciclos 6 s y enfriamiento 5 s.
 4. Pulsa **Empezar entrenamiento** y mantén Pulso visible. Debes escuchar preparación, ejercicio/ronda, descanso, recuperación, enfriamiento y final.
 
-Si no escuchas la prueba, comprueba el volumen, la salida de audio y que el iPhone tenga una voz en español disponible.
+Si no escuchas la prueba, comprueba el volumen, la salida de audio y que la primera descarga de las voces haya terminado con conexión.
 
 ## Bienvenida
 
@@ -26,26 +26,27 @@ Pulso abre con su pantalla de bienvenida. Toca **Entrar a Pulso** para configura
 
 ## Vista horizontal y TV
 
-Al girar el iPhone, el aro y los controles se colocan lado a lado. El panel decorativo no aparece durante el entrenamiento.
+Durante un entrenamiento, gira el iPhone en horizontal para ver el único icono de **Pantalla completa**. Tócalo para ampliar y vuelve a tocarlo para salir. Al girar a vertical o terminar, Pulso recupera su vista normal. El aro conserva su forma circular.
 
-- Toca el único **icono de pantalla/TV** de la esquina para abrir las opciones.
-- Dentro de ese menú, **Modo TV** amplía el temporizador y aprovecha toda el área disponible.
-- **Pantalla completa** oculta el navegador cuando el dispositivo lo permite. En iPhone, abrir Pulso desde el icono de inicio permite evitar las barras de Safari.
-- Ese mismo menú explica cómo duplicar el iPhone con AirPlay. Gíralo en horizontal y usa Centro de control → Duplicar pantalla. La TV compatible y el iPhone deben estar en la misma red wifi.
-- También puedes abrir esta dirección en el navegador de la TV o en una computadora conectada a ella.
-- En duplicación, las bandas negras y los bordes dependen también de la proporción del iPhone y los ajustes de imagen de la TV. Pulso conserva la proporción del aro; no puede controlar el ajuste físico del televisor.
+Safari puede conservar sus barras; abrir Pulso desde la pantalla de inicio ayuda a aprovechar el espacio. En **Más → Cómo usar Pulso en una TV** encontrarás las instrucciones de AirPlay. En una computadora o navegador de TV, el mismo icono permite ampliar el temporizador. La proporción y las bandas negras de la duplicación también dependen del dispositivo y del televisor.
+
+No hay botones de audio ni TV en la cabecera. Las preferencias están reunidas en **Más**.
 
 ## Elegir voz masculina o femenina
 
-En **Más → Voz de la guía**, elige Automática, Femenina o Masculina y pulsa **Probar voz**. También puedes elegir una voz específica por nombre. La elección queda guardada en el dispositivo.
+En **Más → Voz de la guía**, elige **Femenina** o **Masculina** y pulsa **Probar voz**. La elección queda guardada en este navegador.
 
-La selección utiliza las voces en español que ofrece el navegador. Si no se identifica el tipo elegido, Pulso lo indica y muestra la alternativa que usará. No descarga voces ni simula el género cambiando el tono.
+Ambas voces en español están incluidas en la app como audios. No dependen de las voces de Siri ni de las que Safari pueda mostrar. La primera descarga necesita conexión; después de que la app indique que está lista sin internet, los audios también se pueden reproducir sin conexión. No se envía texto ni entrenamientos a un servicio de voz.
+
+La guía anuncia las fases y el número de ronda. Los tres últimos segundos siguen usando pitidos. Si una voz no se puede cargar, Pulso muestra un aviso y permite reintentar con **Probar voz**; no sustituye silenciosamente una voz por otra.
+
+Consulta los [créditos y licencia de las voces](audio/CREDITOS.md).
 
 ## Añadir a la pantalla de inicio
 
 En Safari, toca **Compartir → Añadir a pantalla de inicio**. Si aparece **Abrir como app web**, actívalo. Después toca **Añadir**.
 
-En **Más** también encontrarás las instrucciones de instalación. Cuando aparezca «Lista para abrir sin internet en este dispositivo», la interfaz puede cargar sin conexión. La voz depende de las voces disponibles en el iPhone.
+En **Más** también encontrarás las instrucciones de instalación. Cuando aparezca «Lista para abrir sin internet en este dispositivo», la interfaz puede cargar sin conexión. Las dos voces incluidas también se guardan para su reproducción sin conexión.
 
 ## Qué debes saber
 
@@ -57,13 +58,18 @@ En **Más** también encontrarás las instrucciones de instalación. Cuando apar
 - No necesitas cuenta para usar Pulso. No incluye anuncios, analítica ni servidores de datos personales.
 - Cuando se publique una actualización, recarga Pulso para verla. La descarga de la nueva versión no recarga ni interrumpe un entrenamiento que ya esté en marcha.
 
+## Visitas
+
+No se ha añadido analítica ni un contador de visitas. GitHub Pages no ofrece una base de datos privada ni un receptor de eventos para registrar automáticamente las visitas a la app. Las estadísticas Traffic de GitHub corresponden al repositorio, no a las visitas de la página publicada. No se incluyen credenciales de GitHub en el navegador.
+
 ## Desarrollo y comprobaciones
 
 HTML, CSS y JavaScript sin dependencias ni proceso de compilación. Rutas relativas compatibles con sitios de proyecto de GitHub Pages.
 
 ```sh
-node --test engine.test.cjs pwa.test.cjs app.test.cjs voices.test.cjs display.test.cjs
+node --test engine.test.cjs pwa.test.cjs app.test.cjs voices.test.cjs display.test.cjs voice-audio.test.cjs
 node --check app.js
+node --check voice-audio.js
 node --check pwa.js
 node --check sw.js
 ```

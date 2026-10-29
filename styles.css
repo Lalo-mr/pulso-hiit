@@ -254,22 +254,22 @@ body.is-welcome .legend{margin-top:12px;font-size:11px}
 body.is-welcome .side-bottom{display:block;margin-top:auto;padding-top:20px}
 body.is-welcome .side-bottom p{max-width:none;font-size:11px;margin-top:10px}
 body.is-welcome .offline{font-size:12px}
-body.is-welcome .projection-trigger{display:none}
+body.is-welcome .expand-timer-button{display:none}
 
-/* A single floating icon opens all display/TV options without a toolbar. */
-.projection-trigger{position:absolute;z-index:6;top:max(12px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));width:44px;height:44px;background:#26321ee8;border:1px solid #475d33;box-shadow:0 3px 12px #0003}
-.projection-trigger svg{width:23px;height:23px}
-.projection-trigger:hover{background:#3a5028;color:var(--lime)}
-.app-header{padding-right:106px}
-body.is-training .projection-trigger{top:12px;right:16px}
-body.is-training .timer-top{padding-right:60px}
-body.presentation-mode .projection-trigger{top:12px;right:20px}
-.projection-actions{display:flex;flex-direction:column;gap:10px;margin:22px 0}
-.projection-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;border-radius:10px;padding:12px 16px;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
-.projection-actions #tvModeButton{background:var(--lime);color:#1a270b}
-.projection-actions #tvModeButton[aria-pressed=true]{background:#344c22;color:#deefce;border:1px solid #6d8d4c}
-.projection-actions #fullscreenButton,.projection-actions #exitTVButton{background:#29351f;color:#d8e6cc;border:1px solid #455b32}
-.projection-actions #exitTVButton{color:#f4c9ac}
+/* Display controls appear only where they help: expand in a horizontal workout,
+   while TV instructions stay with the other preferences in More. */
+.expand-timer-button{position:absolute;z-index:6;top:max(12px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));width:44px;height:44px;background:transparent;color:#a9b99b}
+.expand-timer-button svg{width:22px;height:22px}
+.expand-timer-button:hover{background:#26321e;color:var(--lime)}
+.expand-timer-button[aria-pressed=true]{color:var(--lime)}
+body.is-training .timer-top{min-height:32px}
+@media(orientation:landscape){body.is-training .timer-top{padding-right:52px}}
+.projection-help-link{display:flex;align-items:center;gap:9px;min-height:44px;margin:12px 0;padding:8px 0;text-align:left;font-size:12px}
+.projection-help-link svg{width:19px;height:19px;flex-shrink:0}
+.voice-option{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 0;font-size:14px;color:var(--text)}
+.voice-option input{accent-color:var(--lime);width:20px;height:20px;flex-shrink:0;margin:0}
+#voiceChoiceStatus{font-size:11px;line-height:1.6;color:var(--muted)}
+.voice-credit{display:inline-block;color:var(--muted);font-size:11px;min-height:44px;padding:14px 0;text-decoration:underline}
 
 @media(max-width:760px) and (orientation:portrait){
  body.is-welcome .companion{padding:max(30px,env(safe-area-inset-top)) 30px max(24px,env(safe-area-inset-bottom))}
@@ -280,14 +280,10 @@ body.presentation-mode .projection-trigger{top:12px;right:20px}
  body.is-welcome .side-bottom{padding-top:26px}
  body.is-welcome .side-bottom p{font-size:10px}
  body.is-training .completion-screen{min-height:100dvh}
- .app-header{padding-right:106px}
 }
 @media(orientation:landscape) and (max-height:600px){
  body:not(.is-welcome):not(.is-training):not(.presentation-mode) .shell{width:100%;max-width:none}
- .app-header{padding-right:106px}
- .projection-trigger{top:4px;right:16px}
- body.is-training .projection-trigger{top:8px;right:16px}
- body.presentation-mode .projection-trigger{top:8px;right:16px}
+ .expand-timer-button{top:8px;right:16px}
  body.is-welcome .companion{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:34px minmax(0,1fr) 30px 18px 52px 28px;gap:10px 40px;padding:max(20px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left));overflow:visible}
  body.is-welcome .companion>*{width:100%;max-width:none;margin-left:0;margin-right:0}
  body.is-welcome .brand{grid-column:1 / -1;grid-row:1;font-size:26px}
@@ -301,6 +297,10 @@ body.presentation-mode .projection-trigger{top:12px;right:20px}
  body.is-welcome .side-bottom{grid-column:2;grid-row:6;margin:0;padding:0;align-self:center}
  body.is-welcome .side-bottom p{display:none}
  body.is-welcome .offline{font-size:11px}
+}
+@media(orientation:landscape) and (max-height:300px){
+ body.is-training .phase-heading{padding-right:48px}
+ .expand-timer-button{top:4px;right:12px}
 }
 @media(orientation:landscape) and (max-height:360px){
  body.is-welcome .companion{grid-template-rows:30px minmax(0,1fr) 26px 16px 48px 22px;gap:8px 24px;padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}

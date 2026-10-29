@@ -1,10 +1,10 @@
 /* The cache is restricted to this app's URL scope, including GitHub project paths. */
 'use strict';
-const VERSION = '2026-10-28-4';
+const VERSION = '2026-10-29-5';
 const SCOPE = new URL(self.registration.scope);
 const CACHE_PREFIX = 'pulso-hiit:' + encodeURIComponent(SCOPE.pathname) + ':';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
-const FILES = ['./', 'index.html', 'styles.css', 'engine.js', 'app.js', 'voices.js', 'display.js', 'pwa.js', 'manifest.webmanifest', 'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'];
+const FILES = ['./', 'index.html', 'styles.css', 'engine.js', 'app.js', 'voices.js', 'voice-audio.js', 'display.js', 'pwa.js', 'manifest.webmanifest', 'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'audio/manifest.json', 'audio/male.mp3', 'audio/female.mp3', 'audio/CREDITOS.md'];
 const APP_URLS = FILES.map(file => new URL(file, SCOPE).href);
 const APP_URL_SET = new Set(APP_URLS);
 self.addEventListener('install', event => {
