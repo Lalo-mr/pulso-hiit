@@ -227,7 +227,10 @@ $('closeTimer').addEventListener('click',endSession);$('endButton').addEventList
 $('backButton').addEventListener('click',()=>selectMode(currentMode));
 $('againButton').addEventListener('click',()=>{if(lastWorkout)startWorkout(lastWorkout);});
 $('settingsButton').addEventListener('click',()=>selectMode('more'));
-document.querySelector('.mobile-brand').addEventListener('click',ev=>{ev.preventDefault();selectMode('tabata');});
+$('welcomeStartButton').addEventListener('click',()=>{
+ document.body.classList.remove('is-welcome');selectMode(currentMode);document.querySelector('.app').focus({preventScroll:true});
+});
+document.querySelector('.mobile-brand').addEventListener('click',ev=>{ev.preventDefault();if(!session)document.body.classList.add('is-welcome');});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>selectMode(b.dataset.mode)));
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if('speechSynthesis'in window)speechSynthesis.cancel();releaseWake();}else if(session){requestWake();}});
 document.addEventListener('keydown',ev=>{if(session&&ev.code==='Space'&&!document.querySelector('dialog[open]')&&!['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)){ev.preventDefault();togglePause();}});

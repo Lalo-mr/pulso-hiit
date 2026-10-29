@@ -18,7 +18,7 @@ function harness(options = {}) {
       this.attributes = {}; this.dataset = {}; this.style = {setProperty(){}};
       this.value = ''; this.hidden = false; this.disabled = false; this.open = false;
       const classes = new Set();
-      this.classList = {add: x => classes.add(x), remove: x => classes.delete(x), toggle(x, force) { const enabled = force === undefined ? !classes.has(x) : force; if(enabled) classes.add(x); else classes.delete(x); return enabled; }};
+      this.classList = {contains: x => classes.has(x), add: x => classes.add(x), remove: x => classes.delete(x), toggle(x, force) { const enabled = force === undefined ? !classes.has(x) : force; if(enabled) classes.add(x); else classes.delete(x); return enabled; }};
     }
     set id(value) { this.elementId = String(value); elements.set(this.elementId,this); }
     get id() { return this.elementId || ''; }
@@ -53,6 +53,7 @@ function harness(options = {}) {
     querySelector: selector => selector === 'dialog[open]' ? [...elements.values()].find(e => e.open) || null : query.get(selector) || null,
     querySelectorAll: selector => selector === '[data-mode]' ? Object.values(nav) : []
   });
+  document.body.classList.add('is-welcome');
   const base = {id:null,name:'Prueba',mode:'tabata',prepare:0,work:3,rest:0,rounds:1,cycles:1,cycleRest:0,cooldown:0,lap:20};
   const initial = {version:1,drafts:{tabata:{...base,...options.workout},rounds:{...base,mode:'rounds'},stopwatch:{...base,mode:'stopwatch',prepare:5,...options.stopwatch}},profiles:[],history:[],prefs:{sound:false,voice:true,flash:false,keepAwake:false,...options.prefs}};
   let saved = JSON.stringify(initial);
@@ -73,7 +74,7 @@ function harness(options = {}) {
   context.window = context;
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'app.js'),'utf8'),context,{filename:'app.js'});
   return {
-    get, nav, spoken,
+    get, nav, spoken, body:document.body, brand:query.get('.mobile-brand'),
     click: id => get(id).fire('click'),
     change: (id,value) => {const element=get(id);element.value=value;return element.fire('change');},
     changeVoices(voices) {deviceVoices=voices;for(const handler of speechListeners.get('voiceschanged')||[])handler();},
@@ -191,4 +192,22 @@ test('delayed voiceschanged refreshes the visible list and preserves the preferr
   assert.equal(h.get('voiceGenderSelect').value,'male');
   await h.click('testVoiceButton');
   assert.equal(h.spoken.at(-1).voice,male);
+});
+
+
+test('welcome opens the existing configuration without changing stored routines',async()=>{
+  const h=harness();
+  const before=h.data();
+  assert.equal(h.body.classList.contains('is-welcome'),true);
+  await h.click('welcomeStartButton');
+  assert.equal(h.body.classList.contains('is-welcome'),false);
+  assert.equal(h.get('configScreen').hidden,false);
+  assert.deepEqual(h.data(),before);
+  await h.brand.fire('click');
+  assert.equal(h.body.classList.contains('is-welcome'),true);
+  await h.click('welcomeStartButton');
+  await h.click('startButton');
+  await h.brand.fire('click');
+  assert.equal(h.body.classList.contains('is-welcome'),false);
+  assert.equal(h.body.classList.contains('is-training'),true);
 });

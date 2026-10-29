@@ -20,13 +20,18 @@ No necesitas instalar herramientas ni contratar un dominio.
 
 Si no escuchas la prueba, comprueba el volumen, la salida de audio y que el iPhone tenga una voz en español disponible.
 
+## Bienvenida
+
+Pulso abre con su pantalla de bienvenida. Toca **Entrar a Pulso** para configurar tu entrenamiento. El logotipo del menú vuelve a la bienvenida cuando no hay una sesión en marcha.
+
 ## Vista horizontal y TV
 
 Al girar el iPhone, el aro y los controles se colocan lado a lado. El panel decorativo no aparece durante el entrenamiento.
 
-- **Modo TV** amplía el temporizador y aprovecha toda el área disponible.
+- Toca el único **icono de pantalla/TV** de la esquina para abrir las opciones.
+- Dentro de ese menú, **Modo TV** amplía el temporizador y aprovecha toda el área disponible.
 - **Pantalla completa** oculta el navegador cuando el dispositivo lo permite. En iPhone, abrir Pulso desde el icono de inicio permite evitar las barras de Safari.
-- **Ayuda TV** explica cómo duplicar el iPhone con AirPlay. Gíralo en horizontal y usa Centro de control → Duplicar pantalla. La TV compatible y el iPhone deben estar en la misma red wifi.
+- Ese mismo menú explica cómo duplicar el iPhone con AirPlay. Gíralo en horizontal y usa Centro de control → Duplicar pantalla. La TV compatible y el iPhone deben estar en la misma red wifi.
 - También puedes abrir esta dirección en el navegador de la TV o en una computadora conectada a ella.
 - En duplicación, las bandas negras y los bordes dependen también de la proporción del iPhone y los ajustes de imagen de la TV. Pulso conserva la proporción del aro; no puede controlar el ajuste físico del televisor.
 

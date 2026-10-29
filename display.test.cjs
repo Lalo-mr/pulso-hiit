@@ -11,8 +11,9 @@ function harness(options = {}) {
     fire(type, event = {}) { for (const fn of this.listeners.get(type) || []) fn({preventDefault(){}, ...event}); }
     setAttribute(key, value) { this.attributes[key] = value; }
     showModal() { this.open = true; }
+    close() { this.open = false; }
   }
-  const ids = ['tvModeButton','tvTimerButton','fullscreenButton','exitTVButton','displayStatus','projectionHelpButton','projectionHelpDialog'];
+  const ids = ['tvModeButton','fullscreenButton','exitTVButton','displayStatus','projectionHelpButton','projectionHelpDialog'];
   const elements = Object.fromEntries(ids.map(id => [id, new Element()]));
   const document = new Element(), classes = new Set(), timers = new Map();
   let timerSequence = 0;
@@ -76,7 +77,7 @@ test('missing or rejected fullscreen keeps usable TV layout with honest iPhone h
 });
 
 test('exit restores the layout and leaves fullscreen', async () => {
-  const h = harness(); h.click('tvTimerButton'); await flush();
+  const h = harness(); h.click('fullscreenButton'); await flush();
   h.click('exitTVButton'); await flush();
   assert.equal(h.exits(),1);
   assert.equal(h.classes.has('presentation-mode'),false);
@@ -127,7 +128,7 @@ test('display notices clear after seven seconds and stale notices cannot hide a 
   assert.equal(h.timers.size,1);
   const previous=[...h.timers.values()][0];
   assert.equal(previous.milliseconds,7000);
-  h.click('tvTimerButton');
+  h.click('fullscreenButton');
   assert.equal(h.timers.size,1);
   const [replacementId,replacement]=[...h.timers.entries()][0];
   assert.notEqual(replacement,previous);
@@ -137,10 +138,26 @@ test('display notices clear after seven seconds and stale notices cannot hide a 
   h.fireTimer(replacementId);
   assert.equal(h.elements.displayStatus.hidden,true);
   assert.equal(h.elements.displayStatus.textContent,'');
-  h.click('tvTimerButton');
+  h.click('fullscreenButton');
   assert.equal(h.timers.size,1);
   h.click('exitTVButton');
   assert.equal(h.timers.size,0);
   assert.equal(h.elements.displayStatus.hidden,true);
   assert.equal(h.elements.displayStatus.textContent,'');
+});
+
+
+test('the compact TV icon opens the options and actions close the menu before presenting',async()=>{
+  const h=harness();
+  h.click('projectionHelpButton');
+  assert.equal(h.elements.projectionHelpDialog.open,true);
+  h.click('tvModeButton');
+  assert.equal(h.elements.projectionHelpDialog.open,false);
+  assert.equal(h.requests(),1);
+  await flush();
+  h.click('projectionHelpButton');
+  assert.equal(h.elements.projectionHelpDialog.open,true);
+  h.click('exitTVButton');
+  assert.equal(h.elements.projectionHelpDialog.open,false);
+  assert.equal(h.classes.has('presentation-mode'),false);
 });

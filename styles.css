@@ -19,12 +19,7 @@ body{min-height:100svh}
 .timer-top{gap:10px;min-height:44px}
 .timer-top>span{flex:1;min-width:0;max-width:none}
 .timer-top .icon-button{width:44px;height:44px;flex-shrink:0}
-#tvTimerButton{min-width:70px;min-height:44px;width:auto;padding:8px 12px;border-radius:10px;font-size:12px;flex-shrink:0}
 .timer-stats>div>span,.ring-text span,.next-phase>span{font-size:11px;letter-spacing:1px}
-.display-tools{--display-toolbar-height:52px;display:flex;flex-shrink:0;align-items:center;justify-content:flex-end;gap:6px;min-height:var(--display-toolbar-height);padding:4px 16px;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:3}
-.display-tools button{font-size:11px;line-height:1.2;min-height:44px;width:auto;border-radius:9px;background:#20291b;border:1px solid #35432b;padding:8px 11px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.display-tools button[aria-pressed=true]{background:#344a20;border-color:#6e963c;color:var(--lime)}
-.display-tools #projectionHelpButton{width:44px;flex-shrink:0;padding:8px}
 #displayStatus{position:fixed;z-index:15;pointer-events:none;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:min(620px,calc(100vw - 28px));margin:0;padding:11px 15px;border:1px solid #5b7144;border-radius:11px;background:#202d18f5;color:#dbeacb;font-size:12px;line-height:1.45;text-align:center;box-shadow:0 5px 30px #0006}
 .voice-settings{margin:22px 0 12px}
 .voice-select{min-width:0;border:1px solid #35432b;border-radius:13px;padding:18px;margin:0}
@@ -42,7 +37,6 @@ body.is-training .shell{display:block;width:min(1360px,100%);max-width:1360px;he
 body.is-training .app{min-height:0;max-height:none;height:100%}
 body.is-training .mobile-preview-note{display:none}
 body.is-training .completion-screen{min-height:0;height:100%;overflow:auto}
-body.is-training .display-tools{--display-toolbar-height:52px}
 
 /* Wide workout canvas, shared by desktops, landscape phones and televisions. */
 @media(min-width:761px){
@@ -56,7 +50,7 @@ body.is-training .display-tools{--display-toolbar-height:52px}
  body.is-training .phase-heading>span{font-size:clamp(24px,3.3vw,48px);letter-spacing:1px;line-height:1.1}
  body.is-training .phase-heading p{font-size:13px;margin-top:10px}
  body.is-training .ring-wrap{
-  --ring-size:min(100%,calc(var(--training-height) - 174px));
+  --ring-size:min(100%,calc(var(--training-height) - 122px));
   grid-column:1;grid-row:1 / 6;width:var(--ring-size);height:auto;max-height:none;
   aspect-ratio:1 / 1;justify-self:center;align-self:center;margin:0;
  }
@@ -86,8 +80,6 @@ body.is-training .display-tools{--display-toolbar-height:52px}
  body{padding:0;align-items:flex-start}
  .shell{height:auto;min-height:100dvh}
  .app{height:auto;min-height:100dvh;max-height:none}
- .display-tools{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));justify-content:center;flex-wrap:wrap}
- .display-tools button{font-size:11px;padding:8px 10px}
  body.is-training{--training-height:100dvh}
  body.is-training .shell{height:auto;min-height:100dvh;max-width:none}
  body.is-training .app{height:auto;min-height:100dvh}
@@ -116,8 +108,6 @@ body.is-training .display-tools{--display-toolbar-height:52px}
  .mobile-brand{display:block;font-size:20px}
  .mobile-preview-note{display:none}
  .content{padding:18px 24px;overflow:visible}
- .display-tools{--display-toolbar-height:44px;min-height:44px;flex-wrap:nowrap;padding:0 12px;justify-content:flex-end}
- .display-tools button{min-height:40px;font-size:11px;padding:7px 10px}
  .bottom-nav{position:sticky;bottom:0;min-height:58px;padding:4px 20px;z-index:2}
  .bottom-nav button{min-height:48px;flex-direction:row;justify-content:center;font-size:11px;padding:6px;gap:7px}
  .bottom-nav button svg{width:19px;height:19px}
@@ -134,7 +124,6 @@ body.is-training .display-tools{--display-toolbar-height:52px}
  body.is-training{--training-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
  body.is-training .shell{height:var(--training-height);min-height:0}
  body.is-training .app{height:100%;min-height:0}
- body.is-training .display-tools{--display-toolbar-height:44px;min-height:44px}
  body.is-training .timer-screen{
   display:grid;grid-template-columns:minmax(0,43%) minmax(0,1fr);
   grid-template-rows:44px minmax(24px,1fr) auto auto 44px 44px;
@@ -144,7 +133,7 @@ body.is-training .display-tools{--display-toolbar-height:52px}
  body.is-training .phase-heading{grid-column:2;grid-row:2;margin:0;align-self:center}
  body.is-training .phase-heading>span{font-size:clamp(20px,3vw,28px);line-height:1.05;letter-spacing:1px}
  body.is-training .phase-heading p{display:none}
- body.is-training .ring-wrap{grid-column:1;grid-row:1 / 6;width:min(100%,calc(var(--training-height) - 112px));height:auto;aspect-ratio:1 / 1;max-height:none;margin:0;justify-self:center;align-self:center}
+ body.is-training .ring-wrap{grid-column:1;grid-row:1 / 6;width:min(100%,calc(var(--training-height) - 68px));height:auto;aspect-ratio:1 / 1;max-height:none;margin:0;justify-self:center;align-self:center}
  body.is-training .ring-text{gap:10px}
  body.is-training .ring-text strong{font-size:clamp(34px,6.6vw,64px);letter-spacing:-1.8px}
  body.is-training .ring-text span{font-size:11px;letter-spacing:.7px}
@@ -182,12 +171,11 @@ body.is-training .display-tools{--display-toolbar-height:52px}
  body.is-training .next-phase{display:none}
  body.is-training .timer-controls{grid-row:4}
  body.is-training .end-button,body.is-training .laps{grid-row:5}
- body.is-training .ring-wrap{grid-row:1 / 5;width:min(100%,calc(var(--training-height) - 108px))}
+ body.is-training .ring-wrap{grid-row:1 / 5;width:min(100%,calc(var(--training-height) - 64px))}
  body.is-training .phase-heading>span{font-size:20px}
  body.is-training .timer-stats strong{font-size:21px}
  body.is-training .timer-stats>div>span{font-size:11px}
  body.is-training .timer-top>span{font-size:11px}
- #tvTimerButton{min-width:58px;padding:7px;font-size:11px}
 }
 
 /* Presentation mode fills the receiving browser and keeps the ring circular. */
@@ -199,15 +187,13 @@ body.presentation-mode{
 body.presentation-mode .shell{width:100%;max-width:none;height:var(--training-height);min-height:0;display:block;border:0;border-radius:0;box-shadow:none}
 body.presentation-mode .companion,body.presentation-mode .app-header,body.presentation-mode .mobile-preview-note,body.presentation-mode .bottom-nav{display:none}
 body.presentation-mode .app{height:100%;min-height:0;max-height:none}
-body.presentation-mode .display-tools{--display-toolbar-height:52px;min-height:52px;padding:4px 20px}
-body.presentation-mode #tvModeButton,body.presentation-mode #tvTimerButton{display:none}
 body.presentation-mode .content:not(.timer-screen):not(.completion-screen){overflow:auto;width:min(960px,100%);align-self:center;flex:1}
 body.presentation-mode .completion-screen{height:100%;min-height:0;overflow:auto}
 body.presentation-mode .timer-screen{min-height:0}
 :fullscreen{background:var(--bg)}
 @media(min-width:761px) and (min-height:601px){
  body.presentation-mode .timer-screen{grid-template-columns:minmax(0,48%) minmax(0,1fr);grid-template-rows:44px minmax(60px,1fr) auto auto clamp(56px,7vh,80px) 44px;gap:clamp(14px,2vh,24px) clamp(30px,4vw,80px);padding:clamp(24px,3vh,48px) clamp(28px,4vw,80px)}
- body.presentation-mode .ring-wrap{width:min(100%,calc(var(--training-height) - 190px));grid-row:1 / 6}
+ body.presentation-mode .ring-wrap{width:min(100%,calc(var(--training-height) - 138px));grid-row:1 / 6}
  body.presentation-mode .ring-text strong{font-size:clamp(76px,10vw,180px);letter-spacing:-4px}
  body.presentation-mode .ring-text span{font-size:clamp(13px,1.2vw,20px);letter-spacing:2px}
  body.presentation-mode .phase-heading>span{font-size:clamp(36px,4.4vw,72px)}
@@ -224,7 +210,6 @@ body.presentation-mode .timer-screen{min-height:0}
  body.presentation-mode .laps{font-size:14px}
 }
 @media(orientation:landscape) and (max-height:600px){
- body.presentation-mode .display-tools{--display-toolbar-height:44px;min-height:44px;padding:0 12px}
 }
 @media(orientation:portrait) and (max-width:760px){
  body.presentation-mode .shell{height:auto;min-height:var(--training-height)}
@@ -238,7 +223,7 @@ body.presentation-mode .timer-screen{min-height:0}
  body.is-training .timer-stats{grid-row:2}
  body.is-training .timer-controls{grid-row:3}
  body.is-training .end-button,body.is-training .laps{grid-row:4}
- body.is-training .ring-wrap{grid-row:1 / 4;width:min(100%,calc(var(--training-height) - 108px))}
+ body.is-training .ring-wrap{grid-row:1 / 4;width:min(100%,calc(var(--training-height) - 64px))}
  body.is-training .ring-text strong{font-size:clamp(28px,5.5vw,42px)}
  body.is-training .ring-text span{font-size:11px;letter-spacing:.2px}
 }
@@ -248,3 +233,81 @@ body.presentation-mode .timer-screen{min-height:0}
 body.is-training .ring-text strong.long-time{font-size:clamp(30px,5.8vw,80px);letter-spacing:-1.5px}
 @media(orientation:portrait) and (max-width:760px){body.is-training .ring-text strong.long-time{font-size:clamp(28px,11vw,52px)}}
 @media(min-width:761px) and (min-height:601px){body.presentation-mode .ring-text strong.long-time{font-size:clamp(54px,7.2vw,128px)}}
+
+
+/* One welcome screen; the green introduction never competes with the timer. */
+body:not(.is-welcome) .companion{display:none}
+body:not(.is-welcome):not(.is-training):not(.presentation-mode) .shell{display:block;width:min(640px,100%);max-width:640px}
+body.is-welcome{padding:0;background:#151e12;align-items:stretch;min-height:100svh}
+body.is-welcome .shell{display:block;width:100%;max-width:none;height:100dvh;min-height:100svh;border:0;border-radius:0;box-shadow:none;overflow:auto}
+body.is-welcome .app{display:none}
+body.is-welcome .companion{display:flex;flex-direction:column;width:100%;height:100%;min-height:100%;overflow:visible;padding:max(30px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left));background:radial-gradient(ellipse at 70% 10%,#34472966,transparent 65%),linear-gradient(145deg,#24331d,#151f12 70%,#1c2716)}
+body.is-welcome .companion>*{width:min(620px,100%);max-width:620px;margin-left:auto;margin-right:auto}
+body.is-welcome .brand{font-size:29px;min-height:34px}
+body.is-welcome .intro{margin-top:auto;padding-top:28px}
+body.is-welcome .intro h1{font-size:clamp(40px,5.4vw,64px);line-height:1.08;letter-spacing:-2px;margin:20px 0}
+body.is-welcome .intro .eyebrow{font-size:11px;letter-spacing:2px}
+body.is-welcome .intro p{font-size:15px;line-height:1.6}
+body.is-welcome .mini-timeline{margin-top:26px;height:32px;min-height:32px;max-width:620px;gap:7px}
+body.is-welcome .legend{margin-top:12px;font-size:11px}
+.welcome-start{margin-top:24px;min-height:56px;font-size:15px;flex-shrink:0}
+body.is-welcome .side-bottom{display:block;margin-top:auto;padding-top:20px}
+body.is-welcome .side-bottom p{max-width:none;font-size:11px;margin-top:10px}
+body.is-welcome .offline{font-size:12px}
+body.is-welcome .projection-trigger{display:none}
+
+/* A single floating icon opens all display/TV options without a toolbar. */
+.projection-trigger{position:absolute;z-index:6;top:max(12px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));width:44px;height:44px;background:#26321ee8;border:1px solid #475d33;box-shadow:0 3px 12px #0003}
+.projection-trigger svg{width:23px;height:23px}
+.projection-trigger:hover{background:#3a5028;color:var(--lime)}
+.app-header{padding-right:106px}
+body.is-training .projection-trigger{top:12px;right:16px}
+body.is-training .timer-top{padding-right:60px}
+body.presentation-mode .projection-trigger{top:12px;right:20px}
+.projection-actions{display:flex;flex-direction:column;gap:10px;margin:22px 0}
+.projection-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;border-radius:10px;padding:12px 16px;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.projection-actions #tvModeButton{background:var(--lime);color:#1a270b}
+.projection-actions #tvModeButton[aria-pressed=true]{background:#344c22;color:#deefce;border:1px solid #6d8d4c}
+.projection-actions #fullscreenButton,.projection-actions #exitTVButton{background:#29351f;color:#d8e6cc;border:1px solid #455b32}
+.projection-actions #exitTVButton{color:#f4c9ac}
+
+@media(max-width:760px) and (orientation:portrait){
+ body.is-welcome .companion{padding:max(30px,env(safe-area-inset-top)) 30px max(24px,env(safe-area-inset-bottom))}
+ body.is-welcome .intro{padding-top:28px}
+ body.is-welcome .intro h1{font-size:clamp(34px,10.8vw,52px);letter-spacing:-1.5px;margin:18px 0}
+ body.is-welcome .intro p{font-size:14px}
+ body.is-welcome .mini-timeline{margin-top:26px;height:30px;min-height:30px}
+ body.is-welcome .side-bottom{padding-top:26px}
+ body.is-welcome .side-bottom p{font-size:10px}
+ body.is-training .completion-screen{min-height:100dvh}
+ .app-header{padding-right:106px}
+}
+@media(orientation:landscape) and (max-height:600px){
+ body:not(.is-welcome):not(.is-training):not(.presentation-mode) .shell{width:100%;max-width:none}
+ .app-header{padding-right:106px}
+ .projection-trigger{top:4px;right:16px}
+ body.is-training .projection-trigger{top:8px;right:16px}
+ body.presentation-mode .projection-trigger{top:8px;right:16px}
+ body.is-welcome .companion{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:34px minmax(0,1fr) 30px 18px 52px 28px;gap:10px 40px;padding:max(20px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left));overflow:visible}
+ body.is-welcome .companion>*{width:100%;max-width:none;margin-left:0;margin-right:0}
+ body.is-welcome .brand{grid-column:1 / -1;grid-row:1;font-size:26px}
+ body.is-welcome .intro{grid-column:1;grid-row:2 / 7;padding:0;margin:0;align-self:center}
+ body.is-welcome .intro h1{font-size:clamp(28px,4.8vw,42px);letter-spacing:-1.3px;margin:13px 0;line-height:1.07}
+ body.is-welcome .intro .eyebrow{font-size:10px;letter-spacing:1.3px}
+ body.is-welcome .intro p{font-size:13px;line-height:1.5}
+ body.is-welcome .mini-timeline{grid-column:2;grid-row:3;height:30px;min-height:30px;margin:0;align-self:end;gap:5px}
+ body.is-welcome .legend{grid-column:2;grid-row:4;margin:0;font-size:10px;gap:20px;align-self:center}
+ body.is-welcome .welcome-start{grid-column:2;grid-row:5;margin:0;min-height:48px;font-size:14px;align-self:center}
+ body.is-welcome .side-bottom{grid-column:2;grid-row:6;margin:0;padding:0;align-self:center}
+ body.is-welcome .side-bottom p{display:none}
+ body.is-welcome .offline{font-size:11px}
+}
+@media(orientation:landscape) and (max-height:360px){
+ body.is-welcome .companion{grid-template-rows:30px minmax(0,1fr) 26px 16px 48px 22px;gap:8px 24px;padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+ body.is-welcome .brand{font-size:23px;min-height:30px}
+ body.is-welcome .intro h1{font-size:clamp(27px,4.6vw,34px);margin:11px 0}
+ body.is-welcome .intro .eyebrow{font-size:9px;letter-spacing:.6px}
+ body.is-welcome .intro p{font-size:12px}
+ body.is-welcome .mini-timeline{height:26px;min-height:26px}
+ body.is-welcome .welcome-start{font-size:13px;min-height:46px;padding:10px}
+}

@@ -1,6 +1,6 @@
 /* The cache is restricted to this app's URL scope, including GitHub project paths. */
 'use strict';
-const VERSION = '2026-10-28-3';
+const VERSION = '2026-10-28-4';
 const SCOPE = new URL(self.registration.scope);
 const CACHE_PREFIX = 'pulso-hiit:' + encodeURIComponent(SCOPE.pathname) + ':';
 const CACHE_NAME = CACHE_PREFIX + VERSION;

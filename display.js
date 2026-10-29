@@ -3,7 +3,6 @@
   'use strict';
   const get = id => document.getElementById(id);
   const tvButton = get('tvModeButton');
-  const timerButton = get('tvTimerButton');
   const fullscreenButton = get('fullscreenButton');
   const exitButton = get('exitTVButton');
   const status = get('displayStatus');
@@ -43,7 +42,6 @@
       tvButton.setAttribute('aria-pressed', String(presenting));
       tvButton.textContent = presenting ? 'Modo TV activado' : 'Modo TV';
     }
-    if (timerButton) timerButton.setAttribute('aria-pressed', String(presenting));
     if (fullscreenButton) {
       fullscreenButton.setAttribute('aria-pressed', String(fullscreen));
       fullscreenButton.textContent = fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa';
@@ -85,6 +83,7 @@
     } catch (_) { if (token === operation && presenting) fallback(); }
   }
   function enter() {
+    if (helpDialog && helpDialog.open) helpDialog.close();
     const token = ++operation;
     presenting = true;
     message('Modo TV activo. Gira el iPhone para usar la vista horizontal.');
@@ -92,6 +91,7 @@
     requestNative(token);
   }
   function leave() {
+    if (helpDialog && helpDialog.open) helpDialog.close();
     operation += 1;
     presenting = false;
     message('');
@@ -99,7 +99,6 @@
     exitNative();
   }
   if (tvButton) tvButton.addEventListener('click', () => { if (presenting) leave(); else enter(); });
-  if (timerButton) timerButton.addEventListener('click', enter);
   if (fullscreenButton) fullscreenButton.addEventListener('click', () => { if (fullscreenElement()) leave(); else enter(); });
   if (exitButton) exitButton.addEventListener('click', leave);
   if (helpButton) helpButton.addEventListener('click', () => {
